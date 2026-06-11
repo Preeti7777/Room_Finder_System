@@ -1,0 +1,61 @@
+{% extends 'accounts/base.html' %}
+{% block content %}
+
+    <div class="form-box">
+ 
+            <h2 class="form-title">Welcome back</h2>
+ 
+            <!-- Django form -->
+            <form method="POST" novalidate>
+                {% csrf_token %}
+ 
+                <div class="field-group">
+                    <label for="{{ form.email.id_for_label }}">Email address</label>
+                    <div class="input-wrap">
+                        <i class="ti ti-mail field-icon"></i>
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}
+                        <ul class="errorlist">
+                            {% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+ 
+                <div class="field-group">
+                    <label for="{{ form.password.id_for_label }}">Password</label>
+                    <div class="input-wrap">
+                        <i class="ti ti-lock field-icon"></i>
+                        {{ form.password }}
+                        <button type="button" class="toggle-pw" aria-label="Toggle password visibility" onclick="togglePw(this)">
+                            <i class="ti ti-eye"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <ul class="errorlist">
+                            {% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+ 
+                {% if form.non_field_errors %}
+                    <div style="background:#fff3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#c0392b;">
+                        {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+                    </div>
+                {% endif %}
+ 
+                <div class="forgot-row">
+                    <a href="#">Forgot password?</a>
+                </div>
+ 
+                <button type="submit" class="btn-auth" id="loginBtn">
+                    Sign in <i class="ti ti-arrow-right"></i>
+                </button>
+            </form>
+ 
+            <p class="form-footer">
+                Don't have an account? <a href="{% url 'register' %}">Create one free</a>
+            </p>
+ 
+        </div>
+    {% endblock %}

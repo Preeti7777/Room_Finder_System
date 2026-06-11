@@ -1,0 +1,565 @@
+{% extends 'accounts/base.html' %}
+{% block content %}
+
+<style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f0f4f2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 0;
+        }
+
+        /* ── Wrapper ── */
+        .auth-wrapper {
+            display: flex;
+            width: 1020px;
+            max-width: 98vw;
+            min-height: 620px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.13);
+            animation: wrapperIn 0.55s cubic-bezier(.22,.9,.36,1) both;
+        }
+
+        @keyframes wrapperIn {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Left panel ── */
+        .auth-left {
+            width: 38%;
+            background: linear-gradient(155deg, #0F6E56 0%, #085041 100%);
+            padding: 52px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            top: -100px; right: -100px;
+            animation: float 7s ease-in-out infinite;
+        }
+
+        .auth-left::after {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            bottom: -60px; left: -50px;
+            animation: float 9s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-18px); }
+        }
+
+        .left-content { position: relative; z-index: 1; }
+
+        .brand {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 48px;
+            animation: fadeUp 0.5s 0.1s both;
+        }
+
+        .brand-icon {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .brand-icon i { font-size: 20px; color: #fff; }
+        .brand-name { color: #fff; font-size: 17px; font-weight: 600; letter-spacing: -0.2px; }
+
+        .left-heading {
+            color: #fff;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.28;
+            margin-bottom: 12px;
+            animation: fadeUp 0.5s 0.2s both;
+        }
+
+        .left-sub {
+            color: rgba(255,255,255,0.68);
+            font-size: 14px;
+            line-height: 1.65;
+            animation: fadeUp 0.5s 0.3s both;
+        }
+
+        .left-features { margin-top: 32px; display: flex; flex-direction: column; gap: 18px; }
+
+        .feat-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            animation: fadeUp 0.5s both;
+        }
+
+        .feat-item:nth-child(1) { animation-delay: 0.4s; }
+        .feat-item:nth-child(2) { animation-delay: 0.5s; }
+        .feat-item:nth-child(3) { animation-delay: 0.6s; }
+
+        .feat-icon {
+            width: 34px; height: 34px; flex-shrink: 0;
+            background: rgba(255,255,255,0.12);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .feat-icon i { font-size: 16px; color: rgba(255,255,255,0.9); }
+        .feat-text p { color: rgba(255,255,255,0.92); font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .feat-text span { color: rgba(255,255,255,0.52); font-size: 12px; }
+
+        /* ── Right panel ── */
+        .auth-right {
+            flex: 1;
+            background: #fff;
+            padding: 44px 48px;
+            overflow-y: auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 480px;
+            animation: fadeUp 0.55s 0.15s both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-title {
+            font-size: 22px; font-weight: 700;
+            color: #0d1f1a; margin-bottom: 4px;
+        }
+
+        .form-subtitle {
+            font-size: 14px; color: #6b7c76; margin-bottom: 24px;
+        }
+
+        /* ── Role toggle ── */
+        .role-toggle {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-bottom: 22px;
+        }
+
+        .role-btn {
+            padding: 11px 14px;
+            border: 1.5px solid #e2ebe7;
+            border-radius: 11px;
+            background: #f8fbfa;
+            font-size: 13px; font-weight: 500; color: #4a5a55;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.22s;
+        }
+
+        .role-btn i { font-size: 16px; }
+
+        .role-btn:hover { background: #edf7f3; border-color: #a8d4c4; }
+
+        .role-btn.active {
+            background: #edf7f3;
+            border-color: #0F6E56;
+            color: #0F6E56;
+            font-weight: 600;
+            box-shadow: 0 0 0 3px rgba(15,110,86,0.10);
+        }
+
+        /* ── Fields ── */
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .field-group { margin-bottom: 16px; }
+
+        .field-group label {
+            display: block;
+            font-size: 12px; font-weight: 600;
+            color: #4a5a55; letter-spacing: 0.03em;
+            margin-bottom: 7px;
+        }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap .field-icon {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px; color: #94a89f;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .input-wrap .toggle-pw {
+            position: absolute; right: 13px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px; color: #94a89f;
+            cursor: pointer; background: none; border: none; padding: 0;
+            transition: color 0.2s;
+        }
+
+        .input-wrap .toggle-pw:hover { color: #0F6E56; }
+
+        .input-wrap input,
+        .input-wrap select {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            border: 1.5px solid #e2ebe7;
+            border-radius: 11px;
+            font-size: 14px;
+            color: #0d1f1a;
+            background: #f8fbfa;
+            outline: none;
+            transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+            appearance: none;
+        }
+
+        .input-wrap input:focus,
+        .input-wrap select:focus {
+            border-color: #0F6E56;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(15,110,86,0.10);
+        }
+
+        /* ── Avatar upload ── */
+        .avatar-upload {
+            border: 1.5px dashed #c2d9cf;
+            border-radius: 11px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.22s, background 0.22s;
+            background: #f8fbfa;
+            margin-bottom: 16px;
+        }
+
+        .avatar-upload:hover { border-color: #0F6E56; background: #edf7f3; }
+
+        .avatar-upload i {
+            font-size: 26px; display: block;
+            color: #0F6E56; margin-bottom: 6px;
+        }
+
+        .avatar-upload p { font-size: 13px; color: #4a5a55; margin-bottom: 2px; font-weight: 500; }
+        .avatar-upload span { font-size: 12px; color: #94a89f; }
+        .avatar-preview { display: none; }
+
+        /* ── Password strength ── */
+        .pw-strength { margin-top: 6px; }
+
+        .pw-bars {
+            display: flex; gap: 4px; margin-bottom: 4px;
+        }
+
+        .pw-bar {
+            flex: 1; height: 3px; border-radius: 2px;
+            background: #e2ebe7;
+            transition: background 0.3s;
+        }
+
+        .pw-bar.active-weak   { background: #e74c3c; }
+        .pw-bar.active-fair   { background: #f39c12; }
+        .pw-bar.active-strong { background: #0F6E56; }
+
+        .pw-label { font-size: 11px; color: #94a89f; }
+
+        /* ── Submit ── */
+        .btn-auth {
+            width: 100%; padding: 12px;
+            background: #0F6E56; color: #fff;
+            border: none; border-radius: 11px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(15,110,86,0.22);
+            margin-top: 4px;
+            position: relative; overflow: hidden;
+        }
+
+        .btn-auth:hover { background: #085041; box-shadow: 0 6px 22px rgba(15,110,86,0.30); }
+        .btn-auth:active { transform: scale(0.977); }
+        .btn-auth i { font-size: 17px; }
+
+        .ripple {
+            position: absolute; border-radius: 50%;
+            background: rgba(255,255,255,0.28);
+            transform: scale(0);
+            animation: ripple-anim 0.55s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+        /* ── Error messages ── */
+        .errorlist {
+            list-style: none; padding: 0; margin: 5px 0 0;
+            font-size: 12px; color: #c0392b;
+        }
+
+        /* ── Footer ── */
+        .form-footer {
+            text-align: center; font-size: 13px;
+            color: #6b7c76; margin-top: 18px;
+        }
+
+        .form-footer a { color: #0F6E56; font-weight: 600; text-decoration: none; }
+        .form-footer a:hover { text-decoration: underline; }
+
+        /* ── Responsive ── */
+        @media (max-width: 720px) {
+            .auth-left { display: none; }
+            .auth-wrapper { width: 100%; border-radius: 0; }
+            .auth-right { padding: 36px 24px; }
+            .field-row { grid-template-columns: 1fr; }
+        }
+    </style>
+<div class="form-box">
+
+            <h2 class="form-title">Create your account</h2>
+            <p class="form-subtitle">Start finding or listing rooms today</p>
+
+            <!-- Role selector -->
+            <div style="margin-bottom:8px;">
+                <p style="font-size:12px;font-weight:600;color:#4a5a55;letter-spacing:.03em;margin-bottom:8px;">I am a...</p>
+                <div class="role-toggle">
+                    <button type="button" class="role-btn active" id="role-tenant" onclick="setRole('tenant')">
+                        <i class="ti ti-user"></i> Tenant
+                    </button>
+                    <button type="button" class="role-btn" id="role-landlord" onclick="setRole('landlord')">
+                        <i class="ti ti-building-estate"></i> Landlord
+                    </button>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="field-group">
+                    <label for="{{ form.username.id_for_label }}">Username</label>
+                    <div class="input-wrap">
+                        <i class="ti ti-at field-icon"></i>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="field-group">
+                    <label for="{{ form.email.id_for_label }}">Email address</label>
+                    <div class="input-wrap">
+                        <i class="ti ti-mail field-icon"></i>
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}
+                        <ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <!-- Phone -->
+                <div class="field-group">
+                    <label for="{{ form.phone.id_for_label }}">Phone number</label>
+                    <div class="input-wrap">
+                        <i class="ti ti-phone field-icon"></i>
+                        {{ form.phone }}
+                    </div>
+                    {% if form.phone.errors %}
+                        <ul class="errorlist">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <!-- Role (hidden — controlled by toggle above) -->
+                <div style="display:none">{{ form.role }}</div>
+
+                <!-- Profile image upload -->
+                <div class="field-group">
+                    <label>Profile photo <span style="font-weight:400;color:#94a89f">(optional)</span></label>
+                    <div class="avatar-upload" id="avatarDrop" onclick="document.getElementById('avatarInput').click()">
+                        <i class="ti ti-cloud-upload" id="uploadIcon"></i>
+                        <p id="uploadText">Click to upload a photo</p>
+                        <span id="uploadSub">JPG, PNG or GIF — max 5 MB</span>
+                        <img id="avatarPreview" class="avatar-preview" style="max-width:80px;border-radius:50%;margin:0 auto;" alt="Preview">
+                    </div>
+                    <div style="display:none">{{ form.profile_image }}</div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+                </div>
+
+                <!-- Passwords -->
+                <div class="field-row">
+                    <div class="field-group">
+                        <label for="{{ form.password1.id_for_label }}">Password</label>
+                        <div class="input-wrap">
+                            <i class="ti ti-lock field-icon"></i>
+                            {{ form.password1 }}
+                            <button type="button" class="toggle-pw" onclick="togglePw(this)" aria-label="Toggle password">
+                                <i class="ti ti-eye"></i>
+                            </button>
+                        </div>
+                        <div class="pw-strength" id="pwStrength" style="display:none">
+                            <div class="pw-bars">
+                                <div class="pw-bar" id="bar1"></div>
+                                <div class="pw-bar" id="bar2"></div>
+                                <div class="pw-bar" id="bar3"></div>
+                                <div class="pw-bar" id="bar4"></div>
+                            </div>
+                            <span class="pw-label" id="pwLabel"></span>
+                        </div>
+                        {% if form.password1.errors %}
+                            <ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="field-group">
+                        <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+                        <div class="input-wrap">
+                            <i class="ti ti-lock-check field-icon"></i>
+                            {{ form.password2 }}
+                            <button type="button" class="toggle-pw" onclick="togglePw(this)" aria-label="Toggle password">
+                                <i class="ti ti-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password2.errors %}
+                            <ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div style="background:#fff3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#c0392b;">
+                        {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="btn-auth" id="registerBtn">
+                    Create account <i class="ti ti-arrow-right"></i>
+                </button>
+            </form>
+
+            <p class="form-footer">
+                Already have an account? <a href="{% url 'login' %}">Sign in</a>
+            </p>
+        </div>
+    </div>
+<script>
+/* Apply Bootstrap form-control to all inputs */
+document.querySelectorAll('.input-wrap input, .input-wrap select').forEach(function(el) {
+    el.classList.add('form-control');
+});
+ 
+/* Role toggle — syncs to hidden Django field */
+function setRole(role) {
+    document.getElementById('role-tenant').classList.toggle('active', role === 'tenant');
+    document.getElementById('role-landlord').classList.toggle('active', role === 'landlord');
+    var sel = document.querySelector('[name="role"]');
+    if (sel) {
+        for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value.toLowerCase() === role) {
+                sel.selectedIndex = i;
+                break;
+            }
+        }
+    }
+}
+ 
+/* Toggle password visibility */
+function togglePw(btn) {
+    var input = btn.closest('.input-wrap').querySelector('input');
+    var icon  = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'ti ti-eye-off';
+    } else {
+        input.type = 'password';
+        icon.className = 'ti ti-eye';
+    }
+}
+ 
+/* Password strength meter */
+var pw1 = document.querySelector('[name="password1"]');
+if (pw1) {
+    pw1.addEventListener('input', function() {
+        var v = this.value;
+        var strength = 0;
+        var meter = document.getElementById('pwStrength');
+        if (!v) { meter.style.display = 'none'; return; }
+        meter.style.display = 'block';
+        if (v.length >= 8)  strength++;
+        if (/[A-Z]/.test(v)) strength++;
+        if (/[0-9]/.test(v)) strength++;
+        if (/[^A-Za-z0-9]/.test(v)) strength++;
+        var labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+        var cls    = ['', 'active-weak', 'active-fair', 'active-strong', 'active-strong'];
+        document.getElementById('pwLabel').textContent = labels[strength];
+        for (var i = 1; i <= 4; i++) {
+            var bar = document.getElementById('bar' + i);
+            bar.className = 'pw-bar';
+            if (i <= strength) bar.classList.add(cls[strength]);
+        }
+    });
+}
+ 
+/* Avatar preview */
+function previewAvatar(input) {
+    if (!input.files || !input.files[0]) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img = document.getElementById('avatarPreview');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('uploadIcon').style.display = 'none';
+        document.getElementById('uploadText').textContent = input.files[0].name;
+        document.getElementById('uploadSub').textContent = 'Click to change';
+        /* Pass to Django form field */
+        var dt = new DataTransfer();
+        dt.items.add(input.files[0]);
+        var djangoInput = document.querySelector('[name="profile_image"]');
+        if (djangoInput) djangoInput.files = dt.files;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+ 
+/* Ripple on submit */
+document.getElementById('registerBtn').addEventListener('click', function(e) {
+    var btn = this;
+    var circle = document.createElement('span');
+    var diameter = Math.max(btn.clientWidth, btn.clientHeight);
+    var radius = diameter / 2;
+    circle.style.cssText = 'width:'+diameter+'px;height:'+diameter+'px;left:'+(e.clientX - btn.getBoundingClientRect().left - radius)+'px;top:'+(e.clientY - btn.getBoundingClientRect().top - radius)+'px';
+    circle.classList.add('ripple');
+    var old = btn.querySelector('.ripple');
+    if (old) old.remove();
+    btn.appendChild(circle);
+});
+ 
+/* Focus icon colour */
+document.querySelectorAll('.input-wrap input, .input-wrap select').forEach(function(inp) {
+    inp.addEventListener('focus', function() {
+        var icon = this.closest('.input-wrap').querySelector('.field-icon');
+        if (icon) icon.style.color = '#0F6E56';
+    });
+    inp.addEventListener('blur', function() {
+        var icon = this.closest('.input-wrap').querySelector('.field-icon');
+        if (icon) icon.style.color = '#94a89f';
+    });
+});
+</script>
+{% endblock %}

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import cloudinary
 from pathlib import Path
 from decouple import config
 
@@ -27,8 +28,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+SECRET_KEY = config('SECRET_KEY')
 # Application definition
+
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),
+    api_key=config('CLOUDINARY_API_KEY'),
+    api_secret=config('CLOUDINARY_API_SECRET'),
+)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -122,6 +129,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+AUTH_USER_MODEL = 'accounts.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

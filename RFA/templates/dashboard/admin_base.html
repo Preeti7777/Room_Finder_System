@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f5f4; color: #1a1a1a; }
+
+    /* Topbar */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #ffffff; border-bottom: 0.5px solid #e5e5e5; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .logo-sm { width: 28px; height: 28px; border-radius: 6px; background: #0F6E56; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; }
+    .app-name { font-size: 15px; font-weight: 500; color: #1a1a1a; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #EEEDFE; color: #0F6E56; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+    .logout-btn { font-size: 12px; color: #666; background: none; border: 0.5px solid #d4d4d4; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+    .logout-btn:hover { background: #f5f5f4; }
+
+    /* Layout */
+    .dash-body { display: grid; grid-template-columns: 180px 1fr; min-height: calc(100vh - 53px); }
+
+    /* Sidebar */
+    .sidebar { border-right: 0.5px solid #e5e5e5; padding: 1.25rem 0; background: #ffffff; }
+    .nav-section { font-size: 10px; letter-spacing: .08em; color: #aaa; padding: 16px 18px 4px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 18px; font-size: 13px; color: #555; cursor: pointer; transition: background .1s; }
+    .nav-item:hover { background: #f5f5f4; color: #1a1a1a; }
+    .nav-item.active { background: #EEEDFE; color: #0F6E56; font-weight: 500; }
+    .nav-item i { font-size: 16px; }
+
+    /* Main */
+    .main { padding: 20px; background: #f5f5f4; }
+    .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .page-head h1 { font-size: 18px; font-weight: 500; color: #1a1a1a; }
+    .page-head .date { font-size: 12px; color: #888; }
+
+    /* Metrics */
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+    .metric-card { background: #ffffff; border: 0.5px solid #e5e5e5; border-radius: 8px; padding: 14px 16px; }
+    .metric-label { font-size: 11px; color: #888; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .metric-val { font-size: 22px; font-weight: 500; color: #1a1a1a; }
+    .metric-delta { font-size: 11px; margin-top: 4px; }
+    .delta-up { color: #3B6D11; }
+    .delta-down { color: #A32D2D; }
+
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-sm"><i class="ti ti-bolt"></i></div>
+    <span class="app-name">AdminPanel</span>
+  </div>
+  <div class="topbar-right">
+    <div style="text-align:right">
+      <div style="font-size:13px;font-weight:500;color:#1a1a1a">{{ user.get_full_name|default:user.username }}</div>
+      <div style="font-size:11px;color:#888">{{ user.email }}</div>
+    </div>
+    <div class="avatar">AU</div>
+    <form method="POST" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="logout-btn">
+        <i class="ti ti-logout"></i> Log out
+    </button>
+    </form>
+  </div>
+</div>
+
+<div class="dash-body">
+  <div class="sidebar">
+    <div class="nav-section">Main</div>
+    <div class="nav-item active"><i class="ti ti-layout-dashboard"></i> Overview</div>
+    <div class="nav-item"><i class="ti ti-user"></i> Profile</div>
+    <div class="nav-item"><i class="ti ti-chart-bar"></i> Requests</div>
+  </div>
+
+  <div class="main">
+    {% block content %}
+    {% endblock %}
+  </div>
+</div>
+
+
+</body>
+</html>

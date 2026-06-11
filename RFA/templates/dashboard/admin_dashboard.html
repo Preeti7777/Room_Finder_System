@@ -1,0 +1,15 @@
+{% extends 'dashboard/admin_base.html' %}
+{% block content %}
+<div class="page-head">
+      <h1>Overview</h1>
+      <span class="date" id="today-date"></span>
+    </div>
+
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label"><i class="ti ti-users"></i> Total users</div>
+        <div class="metric-val">12,486</div>
+        <div class="metric-delta delta-up">↑ 8.2% this month</div>
+      </div>
+    </div>
+    {% endblock %}

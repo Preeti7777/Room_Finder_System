@@ -1,0 +1,401 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Room Finder</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f0f4f2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Wrapper ── */
+        .auth-wrapper {
+            display: flex;
+            width: 960px;
+            max-width: 98vw;
+            min-height: 580px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.13);
+            animation: wrapperIn 0.55s cubic-bezier(.22,.9,.36,1) both;
+        }
+
+        @keyframes wrapperIn {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── Left panel ── */
+        .auth-left {
+            width: 42%;
+            background: linear-gradient(155deg, #0F6E56 0%, #085041 100%);
+            padding: 52px 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            top: -100px; right: -100px;
+            animation: float 7s ease-in-out infinite;
+        }
+
+        .auth-left::after {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            bottom: -60px; left: -50px;
+            animation: float 9s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-18px); }
+        }
+
+        .left-content { position: relative; z-index: 1; }
+
+        .brand {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 52px;
+            animation: fadeUp 0.5s 0.1s both;
+        }
+
+        .brand-icon {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .brand-icon i { font-size: 20px; color: #fff; }
+        .brand-name { color: #fff; font-size: 17px; font-weight: 600; letter-spacing: -0.2px; }
+
+        .left-heading {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.28;
+            margin-bottom: 14px;
+            animation: fadeUp 0.5s 0.2s both;
+        }
+
+        .left-sub {
+            color: rgba(255,255,255,0.68);
+            font-size: 14px;
+            line-height: 1.65;
+            animation: fadeUp 0.5s 0.3s both;
+        }
+
+        .left-features { margin-top: 36px; display: flex; flex-direction: column; gap: 20px; }
+
+        .feat-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            animation: fadeUp 0.5s both;
+        }
+
+        .feat-item:nth-child(1) { animation-delay: 0.4s; }
+        .feat-item:nth-child(2) { animation-delay: 0.5s; }
+
+        .feat-icon {
+            width: 36px; height: 36px; flex-shrink: 0;
+            background: rgba(255,255,255,0.12);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .feat-icon i { font-size: 17px; color: rgba(255,255,255,0.9); }
+        .feat-text p { color: rgba(255,255,255,0.92); font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .feat-text span { color: rgba(255,255,255,0.52); font-size: 12px; }
+
+        /* ── Right panel ── */
+        .auth-right {
+            flex: 1;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 52px 48px;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 360px;
+            animation: fadeUp 0.55s 0.15s both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-title {
+            font-size: 22px; font-weight: 700;
+            color: #0d1f1a; margin-bottom: 6px;
+        }
+
+        .form-subtitle {
+            font-size: 14px; color: #6b7c76; margin-bottom: 28px;
+        }
+
+        /* ── Fields ── */
+        .field-group { margin-bottom: 18px; }
+
+        .field-group label {
+            display: block;
+            font-size: 12px; font-weight: 600;
+            color: #4a5a55; letter-spacing: 0.03em;
+            margin-bottom: 7px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .field-icon {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px; color: #94a89f;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .input-wrap .toggle-pw {
+            position: absolute; right: 13px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px; color: #94a89f;
+            cursor: pointer; background: none; border: none; padding: 0;
+            transition: color 0.2s;
+        }
+
+        .input-wrap .toggle-pw:hover { color: #0F6E56; }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            border: 1.5px solid #e2ebe7;
+            border-radius: 11px;
+            font-size: 14px;
+            color: #0d1f1a;
+            background: #f8fbfa;
+            outline: none;
+            transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+        }
+
+        .input-wrap input:focus {
+            border-color: #0F6E56;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(15,110,86,0.10);
+        }
+
+        .input-wrap input:focus + .field-icon,
+        .input-wrap input:focus ~ .field-icon { color: #0F6E56; }
+
+        .forgot-row {
+            display: flex; justify-content: flex-end;
+            margin-top: -10px; margin-bottom: 22px;
+        }
+
+        .forgot-row a {
+            font-size: 12px; color: #0F6E56;
+            text-decoration: none; font-weight: 500;
+        }
+
+        .forgot-row a:hover { text-decoration: underline; }
+
+        /* ── Submit button ── */
+        .btn-auth {
+            width: 100%; padding: 12px;
+            background: #0F6E56; color: #fff;
+            border: none; border-radius: 11px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(15,110,86,0.22);
+            position: relative; overflow: hidden;
+        }
+
+        .btn-auth::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: rgba(255,255,255,0);
+            transition: background 0.2s;
+        }
+
+        .btn-auth:hover { background: #085041; box-shadow: 0 6px 22px rgba(15,110,86,0.30); }
+        .btn-auth:active { transform: scale(0.977); }
+        .btn-auth i { font-size: 17px; }
+
+        /* ── Ripple ── */
+        .ripple {
+            position: absolute; border-radius: 50%;
+            background: rgba(255,255,255,0.28);
+            transform: scale(0);
+            animation: ripple-anim 0.55s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-anim {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 22px 0;
+            font-size: 12px; color: #94a89f;
+        }
+
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: #e8f0ec;
+        }
+
+        /* ── Social buttons ── */
+        .social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .btn-social {
+            padding: 10px 12px;
+            border: 1.5px solid #e2ebe7;
+            border-radius: 11px; background: #fff;
+            font-size: 13px; color: #2d3d38; font-weight: 500;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background 0.18s, border-color 0.18s, transform 0.15s;
+        }
+
+        .btn-social:hover { background: #f4faf7; border-color: #b5d4c8; transform: translateY(-1px); }
+        .btn-social:active { transform: scale(0.97); }
+
+        .btn-social svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+        /* ── Footer link ── */
+        .form-footer {
+            text-align: center; font-size: 13px;
+            color: #6b7c76; margin-top: 22px;
+        }
+
+        .form-footer a { color: #0F6E56; font-weight: 600; text-decoration: none; }
+        .form-footer a:hover { text-decoration: underline; }
+
+        /* ── Error messages ── */
+        .errorlist {
+            list-style: none; padding: 0; margin: 6px 0 0;
+            font-size: 12px; color: #c0392b;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 720px) {
+            .auth-left { display: none; }
+            .auth-wrapper { width: 100%; border-radius: 0; min-height: 100vh; }
+            .auth-right { padding: 40px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+    <!-- LEFT PANEL -->
+    <div class="auth-left">
+        <div class="left-content">
+            <div class="brand">
+                <div class="brand-icon"><i class="ti ti-building"></i></div>
+                <span class="brand-name">Room Finder</span>
+            </div>
+            <h1 class="left-heading">Find your perfect room today</h1>
+            <p class="left-sub">Connect with verified landlords and discover rooms that fit your lifestyle and budget.</p>
+            <div class="left-features">
+                <div class="feat-item">
+                    <div class="feat-icon"><i class="ti ti-shield-check"></i></div>
+                    <div class="feat-text">
+                        <p>Verified listings</p>
+                        <span>All rooms reviewed for accuracy</span>
+                    </div>
+                </div>
+                <div class="feat-item">
+                    <div class="feat-icon"><i class="ti ti-message-circle"></i></div>
+                    <div class="feat-text">
+                        <p>Direct messaging</p>
+                        <span>Chat with landlords instantly</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="auth-right">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</div>
+
+<script>
+/* Inject Bootstrap form-control class so Django widgets get styled */
+document.querySelectorAll('.input-wrap input, .input-wrap select').forEach(function(el) {
+    el.classList.add('form-control');
+});
+
+/* Ripple effect on submit button */
+document.getElementById('loginBtn').addEventListener('click', function(e) {
+    var btn = this;
+    var circle = document.createElement('span');
+    var diameter = Math.max(btn.clientWidth, btn.clientHeight);
+    var radius = diameter / 2;
+    circle.style.cssText = 'width:'+diameter+'px;height:'+diameter+'px;left:'+(e.clientX - btn.getBoundingClientRect().left - radius)+'px;top:'+(e.clientY - btn.getBoundingClientRect().top - radius)+'px';
+    circle.classList.add('ripple');
+    var old = btn.querySelector('.ripple');
+    if (old) old.remove();
+    btn.appendChild(circle);
+});
+
+/* Toggle password visibility */
+function togglePw(btn) {
+    var input = btn.closest('.input-wrap').querySelector('input');
+    var icon  = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'ti ti-eye-off';
+    } else {
+        input.type = 'password';
+        icon.className = 'ti ti-eye';
+    }
+}
+
+/* Focus: colour the field icon teal */
+document.querySelectorAll('.input-wrap input').forEach(function(inp) {
+    inp.addEventListener('focus', function() {
+        var icon = this.closest('.input-wrap').querySelector('.field-icon');
+        if (icon) icon.style.color = '#0F6E56';
+    });
+    inp.addEventListener('blur', function() {
+        var icon = this.closest('.input-wrap').querySelector('.field-icon');
+        if (icon) icon.style.color = '#94a89f';
+    });
+});
+</script>
+
+</body>
+</html>
