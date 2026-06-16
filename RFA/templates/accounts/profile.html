@@ -806,6 +806,82 @@ body {
     flex-direction: column;
   }
 }
+
+/* citizenship verification */
+.setting-button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.setting-button:hover {
+  background: var(--bg);
+  margin-left: -8px;
+  margin-right: -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: var(--rmd);
+}
+
+.verify-mini-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.verify-mini-pill.verified {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.verify-mini-pill.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.verify-mini-pill.rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.verification-note {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.verification-note.pending {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.verification-note.verified {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.verification-note.rejected {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.verification-note.default {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+
 </style>
 
 <div class="profile-page">
@@ -1155,8 +1231,42 @@ body {
           </div>
           <i class="ti ti-chevron-right chevron-btn" aria-hidden="true"></i>
         </div>
-      </div>
 
+        {% if profile_user.role == "LANDLORD" %}
+          <a href="{% url 'verify_account' %}" class="setting-item setting-link" style="text-decoration:none;">
+            <div class="setting-left">
+              <div class="setting-icon">
+                <i class="ti ti-shield-check" aria-hidden="true"></i>
+              </div>
+
+              <div>
+                <div class="setting-name">Verify account</div>
+
+                {% if profile_user.verification_status == "NOT_SUBMITTED" %}
+                  <div class="setting-sub">Upload citizenship documents</div>
+                {% elif profile_user.verification_status == "PENDING" %}
+                  <div class="setting-sub">Waiting for admin approval</div>
+                {% elif profile_user.verification_status == "VERIFIED" %}
+                  <div class="setting-sub">Your landlord account is verified</div>
+                {% elif profile_user.verification_status == "REJECTED" %}
+                  <div class="setting-sub">Rejected. Upload documents again</div>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if profile_user.verification_status == "VERIFIED" %}
+              <span class="verify-mini-pill verified">Verified</span>
+            {% elif profile_user.verification_status == "PENDING" %}
+              <span class="verify-mini-pill pending">Pending</span>
+            {% elif profile_user.verification_status == "REJECTED" %}
+              <span class="verify-mini-pill rejected">Rejected</span>
+            {% else %}
+              <i class="ti ti-chevron-right chevron-btn" aria-hidden="true"></i>
+            {% endif %}
+          </a>
+        {% endif %}
+      </div>
+      
       <div class="profile-card">
         <div class="card-title-profile">Verification status</div>
 

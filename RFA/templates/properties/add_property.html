@@ -153,25 +153,62 @@
       <h2>📍 Location</h2>
 
       <div class="grid-3" style="margin-bottom:18px;">
-        <div class="field" style="margin-bottom:0">
-          <label for="{{ form.province.id_for_label }}">Province <span class="req">*</span></label>
-          <input type="text" name="{{ form.province.html_name }}" id="{{ form.province.id_for_label }}"
-            value="{{ form.province.value|default_if_none:'' }}" placeholder="e.g. Bagmati">
-          {% if form.province.errors %}<ul class="errorlist">{% for e in form.province.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label for="{{ form.district.id_for_label }}">District <span class="req">*</span></label>
-          <input type="text" name="{{ form.district.html_name }}" id="{{ form.district.id_for_label }}"
-            value="{{ form.district.value|default_if_none:'' }}" placeholder="e.g. Kathmandu">
-          {% if form.district.errors %}<ul class="errorlist">{% for e in form.district.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label for="{{ form.city.id_for_label }}">City <span class="req">*</span></label>
-          <input type="text" name="{{ form.city.html_name }}" id="{{ form.city.id_for_label }}"
-            value="{{ form.city.value|default_if_none:'' }}" placeholder="e.g. Kathmandu">
-          {% if form.city.errors %}<ul class="errorlist">{% for e in form.city.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-        </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label for="{{ form.province.id_for_label }}">
+          Province <span class="req">*</span>
+        </label>
+
+        {{ form.province }}
+
+        {% if form.province.errors %}
+          <ul class="errorlist">
+            {% for e in form.province.errors %}
+              <li>{{ e }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label for="{{ form.district.id_for_label }}">
+          District <span class="req">*</span>
+        </label>
+
+        {{ form.district }}
+
+        {% if form.district.errors %}
+          <ul class="errorlist">
+            {% for e in form.district.errors %}
+              <li>{{ e }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label for="{{ form.city.id_for_label }}">
+          City <span class="req">*</span>
+        </label>
+
+        <input
+          type="text"
+          name="{{ form.city.html_name }}"
+          id="{{ form.city.id_for_label }}"
+          value="{{ form.city.value|default_if_none:'' }}"
+          placeholder="e.g. Kathmandu"
+        >
+
+        {% if form.city.errors %}
+          <ul class="errorlist">
+            {% for e in form.city.errors %}
+              <li>{{ e }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+    </div>
 
       <div class="grid-2" style="margin-bottom:18px;">
         <div class="field" style="margin-bottom:0">
@@ -442,6 +479,62 @@
     const input = document.getElementById('{{ form.lalpurja_image.id_for_label }}');
     input.value = '';
     document.getElementById('lalpurja-preview').style.display = 'none';
+  });
+
+
+   document.addEventListener("DOMContentLoaded", function () {
+    const provinceSelect = document.getElementById("provinceSelect");
+    const districtSelect = document.getElementById("districtSelect");
+
+    if (!provinceSelect || !districtSelect) return;
+
+    const selectedDistrict = "{{ form.district.value|default:'' }}";
+
+    function loadDistricts(province, keepSelected = false) {
+      districtSelect.innerHTML = '<option value="">Loading districts...</option>';
+      districtSelect.disabled = true;
+
+      if (!province) {
+        districtSelect.innerHTML = '<option value="">Select district</option>';
+        districtSelect.disabled = false;
+        return;
+      }
+
+      fetch("{% url 'get_districts_by_province' %}?province=" + encodeURIComponent(province))
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (data) {
+          districtSelect.innerHTML = '<option value="">Select district</option>';
+
+          data.districts.forEach(function (district) {
+            const option = document.createElement("option");
+            option.value = district;
+            option.textContent = district;
+
+            if (keepSelected && district === selectedDistrict) {
+              option.selected = true;
+            }
+
+            districtSelect.appendChild(option);
+          });
+
+          districtSelect.disabled = false;
+        })
+        .catch(function (error) {
+          console.log("District loading error:", error);
+          districtSelect.innerHTML = '<option value="">Select district</option>';
+          districtSelect.disabled = false;
+        });
+    }
+
+    provinceSelect.addEventListener("change", function () {
+      loadDistricts(this.value, false);
+    });
+
+    if (provinceSelect.value) {
+      loadDistricts(provinceSelect.value, true);
+    }
   });
 </script>
 {% endblock %}

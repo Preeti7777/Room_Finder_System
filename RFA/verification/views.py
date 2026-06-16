@@ -29,7 +29,7 @@ def verification_list(request):
         "rejected": all_properties.filter(status="rejected").count(),
     }
 
-    return render(request, "verification/verification.html", {
+    return render(request, "verification/property_verification.html", {
         "page_obj":      page,
         "status_filter": status_filter,
         "stats":         stats,

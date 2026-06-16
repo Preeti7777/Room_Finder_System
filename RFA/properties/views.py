@@ -7,49 +7,105 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Property, PropertyImage, Facility, Wishlist
 from .forms import FacilityForm, PropertyForm
+from .location_data import NEPAL_PROVINCES_DISTRICTS
 
 
 @login_required
 def add_property(request):
-    if request.method == 'POST':
+    # Only landlords can add properties
+    if request.user.role != "LANDLORD":
+        messages.error(request, "Only landlords can add properties.")
+        return redirect("property_list")
+
+    # If landlord has not submitted verification documents
+    if request.user.verification_status == "NOT_SUBMITTED":
+        messages.warning(
+            request,
+            "Please verify your landlord account before adding a property."
+        )
+        return redirect("verify_account")
+
+    # If documents are waiting for admin approval
+    if request.user.verification_status == "PENDING":
+        messages.warning(
+            request,
+            "Your verification documents are pending admin approval. You can add property only after approval."
+        )
+        return redirect("profile")
+
+    # If admin rejected documents
+    if request.user.verification_status == "REJECTED":
+        messages.error(
+            request,
+            "Your verification was rejected. Please upload valid documents again."
+        )
+        return redirect("verify_account")
+
+    # Final safety check
+    if request.user.verification_status != "VERIFIED":
+        messages.error(
+            request,
+            "Your landlord account must be verified before adding a property."
+        )
+        return redirect("verify_account")
+
+    if request.method == "POST":
         form = PropertyForm(request.POST, request.FILES)
         facility_form = FacilityForm(request.POST)
 
         if form.is_valid() and facility_form.is_valid():
-            # Save property
-            property = form.save(commit=False)
-            property.owner = request.user
-            property.save()
+            property_obj = form.save(commit=False)
+            property_obj.owner = request.user
+            property_obj.save()
 
-            # Save facilities
             facility = facility_form.save(commit=False)
-            facility.property = property
+            facility.property = property_obj
             facility.save()
 
-            # Save property images
-            images = request.FILES.getlist('images')
+            images = request.FILES.getlist("images")
+
             for i, image in enumerate(images):
                 PropertyImage.objects.create(
-                    property=property,
+                    property=property_obj,
                     image=image,
                     is_primary=(i == 0)
                 )
 
             messages.success(
-                request, 'Your property has been submitted and is pending for review.')
-            return redirect('property_list')  # change to your actual URL name
+                request,
+                "Your property has been submitted and is pending for review."
+            )
+            return redirect("property_list")
 
-        else:
-            messages.error(
-                request, 'Please fix the errors below and try again.')
+        messages.error(
+            request,
+            "Please fix the errors below and try again."
+        )
 
     else:
         form = PropertyForm()
         facility_form = FacilityForm()
 
-    return render(request, 'properties/add_property.html', {
-        'form': form,
-        'facility_form': facility_form,
+    return render(request, "properties/add_property.html", {
+        "form": form,
+        "facility_form": facility_form,
+    })
+
+
+def get_districts_by_province(request):
+    province = request.GET.get("province", "").strip()
+
+    if province:
+        districts = NEPAL_PROVINCES_DISTRICTS.get(province, [])
+    else:
+        districts = []
+        for province_districts in NEPAL_PROVINCES_DISTRICTS.values():
+            districts.extend(province_districts)
+
+        districts = sorted(set(districts))
+
+    return JsonResponse({
+        "districts": districts
     })
 
 
@@ -178,6 +234,7 @@ def property_detail(request, pk):
         "is_wishlisted": is_wishlisted
     })
 
+
 @login_required
 def toggle_wishlist(request, pk):
     if request.method != "POST":
@@ -202,6 +259,7 @@ def toggle_wishlist(request, pk):
         "wishlisted": False,
         "message": "Removed from wishlist"
     })
+
 
 @login_required
 def wishlist_list(request):

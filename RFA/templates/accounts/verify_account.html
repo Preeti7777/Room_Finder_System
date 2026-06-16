@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Verify Account{% endblock %}
+
+{% block content %}
+
+<style>
+  :root {
+    --p: #0F6E56;
+    --p-soft: #E1F5EE;
+    --p-dark: #085041;
+    --p-border: #9FE1CB;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --surface: #ffffff;
+    --bg: #f8f9fa;
+    --danger: #dc2626;
+  }
+
+  .verify-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 0;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--p);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .verify-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(15, 110, 86, 0.08);
+  }
+
+  .verify-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #ffffff, #f0f7ee);
+  }
+
+  .verify-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--p-soft);
+    color: var(--p);
+    border: 1px solid var(--p-border);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+
+  .verify-header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .verify-header p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 620px;
+  }
+
+  .status-note {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .status-note.not-submitted {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+  }
+
+  .status-note.pending {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+  }
+
+  .status-note.verified {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+  }
+
+  .status-note.rejected {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+
+  .verify-form {
+    padding: 24px;
+  }
+
+  .doc-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .doc-card {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .doc-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: var(--p-soft);
+    color: var(--p);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .doc-body label {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .doc-body small {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .verify-file-input {
+    width: 100%;
+    border: 1px dashed #b7c8c0;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .verify-file-input:hover {
+    border-color: var(--p);
+    background: #fbfffd;
+  }
+
+  .current-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    color: var(--p);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-submit,
+  .btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .btn-submit {
+    background: var(--p);
+    color: #fff;
+    border: none;
+  }
+
+  .btn-submit:hover {
+    background: var(--p-dark);
+  }
+
+  .btn-cancel {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-cancel:hover {
+    background: var(--bg);
+  }
+
+  @media(max-width: 560px) {
+    .verify-page {
+      padding: 10px 0;
+    }
+
+    .verify-header,
+    .verify-form {
+      padding: 18px;
+    }
+
+    .doc-card {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column-reverse;
+    }
+
+    .btn-submit,
+    .btn-cancel {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="verify-page">
+
+  <a href="{% url 'profile' %}" class="back-link">
+    <i class="ti ti-arrow-left"></i>
+    Back to profile
+  </a>
+
+  <div class="verify-card">
+
+    <div class="verify-header">
+      <div class="verify-kicker">
+        <i class="ti ti-shield-check"></i>
+        Landlord verification
+      </div>
+
+      <h1>Verify your account</h1>
+
+      <p>
+        Upload your citizenship documents. Admin will review your documents before you can add property listings.
+      </p>
+
+      {% if profile_user.verification_status == "NOT_SUBMITTED" %}
+        <div class="status-note not-submitted">
+          <strong>Verification required.</strong><br>
+          You must submit all required documents before posting properties.
+        </div>
+      {% elif profile_user.verification_status == "PENDING" %}
+        <div class="status-note pending">
+          <strong>Verification pending.</strong><br>
+          Your documents have been submitted and are waiting for admin approval.
+        </div>
+      {% elif profile_user.verification_status == "VERIFIED" %}
+        <div class="status-note verified">
+          <strong>Verified landlord.</strong><br>
+          Your account is verified. You can now add properties.
+        </div>
+      {% elif profile_user.verification_status == "REJECTED" %}
+        <div class="status-note rejected">
+          <strong>Verification rejected.</strong><br>
+          {{ profile_user.verification_rejection_reason|default:"Please upload valid documents again." }}
+        </div>
+      {% endif %}
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="verify-form">
+      {% csrf_token %}
+
+      <div class="doc-grid">
+
+        <div class="doc-card">
+          <div class="doc-icon">
+            <i class="ti ti-id"></i>
+          </div>
+
+          <div class="doc-body">
+            <label>Citizenship front image</label>
+
+            {% if profile_user.citizenship_front_image %}
+              <a href="{{ profile_user.citizenship_front_image.url }}" target="_blank" class="current-file">
+                <i class="ti ti-eye"></i>
+                View current front image
+              </a>
+            {% endif %}
+
+            <small>
+              Upload a clear photo of the front side of your citizenship document.
+            </small>
+
+            {{ form.citizenship_front_image }}
+
+            {% if form.citizenship_front_image.errors %}
+              <small style="color:#dc2626;font-weight:700;">
+                {{ form.citizenship_front_image.errors.0 }}
+              </small>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-icon">
+            <i class="ti ti-id"></i>
+          </div>
+
+          <div class="doc-body">
+            <label>Citizenship back image</label>
+
+            {% if profile_user.citizenship_back_image %}
+              <a href="{{ profile_user.citizenship_back_image.url }}" target="_blank" class="current-file">
+                <i class="ti ti-eye"></i>
+                View current back image
+              </a>
+            {% endif %}
+
+            <small>
+              Upload a clear photo of the back side of your citizenship document.
+            </small>
+
+            {{ form.citizenship_back_image }}
+
+            {% if form.citizenship_back_image.errors %}
+              <small style="color:#dc2626;font-weight:700;">
+                {{ form.citizenship_back_image.errors.0 }}
+              </small>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="doc-card">
+          <div class="doc-icon">
+            <i class="ti ti-camera"></i>
+          </div>
+
+          <div class="doc-body">
+            <label>Photo with citizenship</label>
+
+            {% if profile_user.photo_with_citizenship %}
+              <a href="{{ profile_user.photo_with_citizenship.url }}" target="_blank" class="current-file">
+                <i class="ti ti-eye"></i>
+                View current photo
+              </a>
+            {% endif %}
+
+            <small>
+              Upload a photo of yourself holding your citizenship document.
+            </small>
+
+            {{ form.photo_with_citizenship }}
+
+            {% if form.photo_with_citizenship.errors %}
+              <small style="color:#dc2626;font-weight:700;">
+                {{ form.photo_with_citizenship.errors.0 }}
+              </small>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <a href="{% url 'profile' %}" class="btn-cancel">
+          Cancel
+        </a>
+
+        {% if profile_user.verification_status != "VERIFIED" %}
+          <button type="submit" class="btn-submit">
+            <i class="ti ti-send"></i>
+            Submit for verification
+          </button>
+        {% else %}
+          <a href="{% url 'profile' %}" class="btn-submit">
+            Done
+          </a>
+        {% endif %}
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+{% endblock %}

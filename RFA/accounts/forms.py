@@ -59,6 +59,7 @@ class LoginForm(forms.Form):
     def get_user(self):
         return self.user
 
+
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
@@ -89,5 +90,26 @@ class ProfileUpdateForm(forms.ModelForm):
             "phone": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "Phone number"
+            }),
+        }
+
+class VerificationUploadForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            "citizenship_front_image",
+            "citizenship_back_image",
+            "photo_with_citizenship",
+        ]
+
+        widgets = {
+            "citizenship_front_image": forms.FileInput(attrs={
+                "class": "verify-file-input",
+            }),
+            "citizenship_back_image": forms.FileInput(attrs={
+                "class": "verify-file-input",
+            }),
+            "photo_with_citizenship": forms.FileInput(attrs={
+                "class": "verify-file-input",
             }),
         }

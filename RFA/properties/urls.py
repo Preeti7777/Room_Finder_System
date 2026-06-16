@@ -16,7 +16,11 @@ urlpatterns = [
         views.add_property,
         name='add_property'
     ),
-
+    path(
+        "districts/",
+        views.get_districts_by_province,
+        name="get_districts_by_province"
+    ),
     path(
         'detail/<int:pk>/',
         views.property_detail,

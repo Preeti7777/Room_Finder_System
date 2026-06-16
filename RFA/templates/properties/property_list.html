@@ -385,6 +385,189 @@
     .wishlist-btn.active svg {
       fill: currentColor;
     }
+
+    /* Filters */
+    .filter-panel {
+      max-width: 1200px;
+      margin: -12px auto 26px;
+      padding: 0 32px;
+    }
+
+    .filter-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .filter-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .filter-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .filter-title i {
+      color: var(--accent);
+    }
+
+    .filter-clear {
+      font-size: .8rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .filter-clear:hover {
+      color: var(--accent);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group label {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .filter-group input,
+    .filter-group select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 11px;
+      font-size: .85rem;
+      outline: none;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 110, 86, .12);
+    }
+
+    .facility-filter-box {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .facility-filter-title {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .facility-checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .facility-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: .78rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .facility-check input {
+      accent-color: var(--accent);
+    }
+
+    .filter-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-filter {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      padding: 10px 18px;
+      font-size: .85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-filter:hover {
+      background: var(--accent-dark);
+    }
+
+    .btn-reset {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 18px;
+      font-size: .85rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn-reset:hover {
+      background: var(--bg);
+    }
+
+    @media (max-width: 900px) {
+      .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .filter-panel {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions {
+        flex-direction: column;
+      }
+
+      .btn-filter,
+      .btn-reset {
+        width: 100%;
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -394,7 +577,187 @@
   <h1>Find Your Next<br>Home in Nepal</h1>
   <p>Verified listings — ready to move in.</p>
 </div>
+<div class="filter-panel">
+  <form method="GET" class="filter-card">
 
+    <div class="filter-top">
+      <div class="filter-title">
+        <i class="ti ti-adjustments-horizontal"></i>
+        Filter properties
+      </div>
+
+      <a href="{% url 'property_list' %}" class="filter-clear">
+        Clear all
+      </a>
+    </div>
+
+    <div class="filter-grid">
+
+      <div class="filter-group">
+        <label>Property type</label>
+        <select name="property_type">
+          <option value="">All types</option>
+
+          {% for value, label in property_types %}
+            <option value="{{ value }}" {% if selected_property_type == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Province</label>
+        <select name="province" id="filterProvinceSelect">
+          <option value="">All provinces</option>
+
+          {% for p in provinces %}
+            <option value="{{ p }}" {% if selected_province == p %}selected{% endif %}>
+              {{ p }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>District</label>
+        <select
+          name="district"
+          id="filterDistrictSelect"
+          data-selected="{{ selected_district|default:'' }}"
+        >
+          <option value="">All districts</option>
+
+          {% for d in districts %}
+            <option value="{{ d }}" {% if selected_district == d %}selected{% endif %}>
+              {{ d }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>City / Area</label>
+        <input
+          type="text"
+          name="city"
+          placeholder="e.g. Pokhara"
+          value="{{ selected_city|default:'' }}"
+        >
+      </div>
+
+      <div class="filter-group">
+        <label>Min rent</label>
+        <input
+          type="number"
+          name="min_rent"
+          placeholder="e.g. 5000"
+          value="{{ selected_min_rent|default:'' }}"
+        >
+      </div>
+
+      <div class="filter-group">
+        <label>Max rent</label>
+        <input
+          type="number"
+          name="max_rent"
+          placeholder="e.g. 25000"
+          value="{{ selected_max_rent|default:'' }}"
+        >
+      </div>
+
+    </div>
+
+    <div class="facility-filter-box">
+      <div class="facility-filter-title">Facilities</div>
+
+      <div class="facility-checks">
+
+        <label class="facility-check">
+          <input type="checkbox" name="wifi" value="1" {% if facility_filters.wifi %}checked{% endif %}>
+          WiFi
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="car_parking" value="1" {% if facility_filters.car_parking %}checked{% endif %}>
+          Car parking
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="bike_parking" value="1" {% if facility_filters.bike_parking %}checked{% endif %}>
+          Bike parking
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="attached_bathroom" value="1" {% if facility_filters.attached_bathroom %}checked{% endif %}>
+          Attached bathroom
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="drinking_water" value="1" {% if facility_filters.drinking_water %}checked{% endif %}>
+          Drinking water
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="water_supply_24_7" value="1" {% if facility_filters.water_supply_24_7 %}checked{% endif %}>
+          24/7 water
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="balcony" value="1" {% if facility_filters.balcony %}checked{% endif %}>
+          Balcony
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="furnished" value="1" {% if facility_filters.furnished %}checked{% endif %}>
+          Furnished
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="cctv" value="1" {% if facility_filters.cctv %}checked{% endif %}>
+          CCTV
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="security_guard" value="1" {% if facility_filters.security_guard %}checked{% endif %}>
+          Security guard
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="pet_allowed" value="1" {% if facility_filters.pet_allowed %}checked{% endif %}>
+          Pet allowed
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="laundry_facility" value="1" {% if facility_filters.laundry_facility %}checked{% endif %}>
+          Laundry
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="lift" value="1" {% if facility_filters.lift %}checked{% endif %}>
+          Lift
+        </label>
+
+        <label class="facility-check">
+          <input type="checkbox" name="generator" value="1" {% if facility_filters.generator %}checked{% endif %}>
+          Generator
+        </label>
+
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <a href="{% url 'property_list' %}" class="btn-reset">
+        Reset
+      </a>
+
+      <button type="submit" class="btn-filter">
+        Apply filters
+      </button>
+    </div>
+
+  </form>
+</div>
 <!-- Property Grid -->
 <div class="grid">
 
@@ -702,6 +1065,55 @@
     });
   });
 
+const filterProvinceSelect = document.getElementById("filterProvinceSelect");
+const filterDistrictSelect = document.getElementById("filterDistrictSelect");
+
+function loadFilterDistrictsByProvince() {
+  if (!filterProvinceSelect || !filterDistrictSelect) return;
+
+  const province = filterProvinceSelect.value;
+  const selectedDistrict = filterDistrictSelect.dataset.selected || "";
+
+  filterDistrictSelect.innerHTML = '<option value="">Loading districts...</option>';
+  filterDistrictSelect.disabled = true;
+
+  fetch("{% url 'get_districts_by_province' %}?province=" + encodeURIComponent(province))
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      filterDistrictSelect.innerHTML = '<option value="">All districts</option>';
+
+      data.districts.forEach(function(district) {
+        const option = document.createElement("option");
+        option.value = district;
+        option.textContent = district;
+
+        if (district === selectedDistrict) {
+          option.selected = true;
+        }
+
+        filterDistrictSelect.appendChild(option);
+      });
+
+      filterDistrictSelect.disabled = false;
+    })
+    .catch(function(error) {
+      console.log("District loading error:", error);
+
+      filterDistrictSelect.innerHTML = '<option value="">All districts</option>';
+      filterDistrictSelect.disabled = false;
+    });
+}
+
+if (filterProvinceSelect && filterDistrictSelect) {
+  filterProvinceSelect.addEventListener("change", function() {
+    filterDistrictSelect.dataset.selected = "";
+    loadFilterDistrictsByProvince();
+  });
+
+  document.addEventListener("DOMContentLoaded", loadFilterDistrictsByProvince);
+}
 </script>
 </body>
 {% endblock %}

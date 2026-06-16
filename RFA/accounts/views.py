@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from properties.models import Property, Wishlist
 from .models import User
-from .forms import ProfileUpdateForm, UserRegistrationForm, LoginForm
+from .forms import ProfileUpdateForm, UserRegistrationForm, LoginForm, VerificationUploadForm
 
 
 def register_view(request):
@@ -113,3 +113,47 @@ def profile_view(request):
     }
 
     return render(request, "accounts/profile.html", {**context, "form": form})
+
+@login_required
+def verify_account_view(request):
+    if request.user.role != "LANDLORD":
+        messages.error(request, "Only landlords can submit verification documents.")
+        return redirect("profile")
+
+    if request.method == "POST":
+        form = VerificationUploadForm(
+            request.POST,
+            request.FILES,
+            instance=request.user
+        )
+
+        if form.is_valid():
+            user = form.save(commit=False)
+
+            if (
+                user.citizenship_front_image and
+                user.citizenship_back_image and
+                user.photo_with_citizenship
+            ):
+                if user.verification_status != "VERIFIED":
+                    user.verification_status = "PENDING"
+                    user.verification_rejection_reason = ""
+
+                user.save()
+
+                messages.success(
+                    request,
+                    "Verification documents submitted successfully. Please wait for admin approval."
+                )
+                return redirect("profile")
+
+            messages.error(request, "Please upload all required verification documents.")
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = VerificationUploadForm(instance=request.user)
+
+    return render(request, "accounts/verify_account.html", {
+        "form": form,
+        "profile_user": request.user,
+    })
