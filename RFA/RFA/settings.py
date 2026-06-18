@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'accounts',
     'verification',
     'properties',
-    'favourites',
     'documents',
     'reports',
     'dashboard',

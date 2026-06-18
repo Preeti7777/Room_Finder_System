@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Property, PropertyImage, Facility, Wishlist
 from .forms import FacilityForm, PropertyForm
 from .location_data import NEPAL_PROVINCES_DISTRICTS
-
+from advertisements.utils import get_active_ads, get_phone_reveal_ad
 
 @login_required
 def add_property(request):
@@ -223,15 +223,36 @@ def property_detail(request, pk):
     )
 
     is_wishlisted = False
+
     if request.user.is_authenticated:
         is_wishlisted = Wishlist.objects.filter(
             user=request.user,
             property=property
         ).exists()
 
+    # Get normal banner ad for detail page below images
+    detail_below_image_ads = get_active_ads(
+        'detail_below_images',
+        limit=1
+    )
+
+    # Get rewarded ad for phone reveal
+    phone_reveal_ad = get_phone_reveal_ad()
+
+    # Check if phone was already revealed in this browser session
+    revealed_properties = request.session.get(
+        'revealed_phone_properties',
+        []
+    )
+
+    phone_already_revealed = property.pk in revealed_properties
+
     return render(request, "properties/property_detail.html", {
         "property": property,
-        "is_wishlisted": is_wishlisted
+        "is_wishlisted": is_wishlisted,
+        "detail_below_image_ads": detail_below_image_ads,
+        "phone_reveal_ad": phone_reveal_ad,
+        "phone_already_revealed": phone_already_revealed,
     })
 
 
@@ -293,3 +314,32 @@ def remove_from_wishlist(request, pk):
         messages.success(request, "Property removed from wishlist.")
 
     return redirect("wishlist_list")
+
+@login_required
+def reveal_phone_number(request, pk):
+    property = get_object_or_404(
+        Property,
+        pk=pk,
+        status="approved"
+    )
+
+    if not property.owner.phone:
+        return JsonResponse({
+            "success": False,
+            "message": "Phone number is not available."
+        })
+
+    revealed_properties = request.session.get(
+        'revealed_phone_properties',
+        []
+    )
+
+    if pk not in revealed_properties:
+        revealed_properties.append(pk)
+        request.session['revealed_phone_properties'] = revealed_properties
+        request.session.modified = True
+
+    return JsonResponse({
+        "success": True,
+        "phone": property.owner.phone
+    })

@@ -630,6 +630,206 @@
       font-size: 19px;
     }
   }
+
+  /* advertisement modal */
+  .phone-reveal-box {
+    background: var(--p-soft);
+    border: 1px solid #9FE1CB;
+    border-radius: 12px;
+    padding: 13px;
+    margin-bottom: 12px;
+}
+
+.phone-label {
+    font-size: 12px;
+    color: var(--p-dark);
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.phone-number {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.reward-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.reward-modal.show {
+    display: flex;
+}
+
+.reward-card {
+    width: 100%;
+    max-width: 440px;
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.22);
+}
+
+.reward-header {
+    padding: 18px 20px;
+    background: linear-gradient(135deg, var(--p-soft), #ffffff);
+    border-bottom: 1px solid var(--border);
+}
+
+.reward-header h5 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    margin: 0 0 4px;
+}
+
+.reward-header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+}
+
+.reward-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.reward-body img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 13px;
+    margin-bottom: 14px;
+}
+
+.reward-body h6,
+.fallback-ad h6 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.reward-body p,
+.fallback-ad p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.fallback-ad {
+    background: var(--p-soft);
+    border: 1px solid #9FE1CB;
+    border-radius: 13px;
+    padding: 22px;
+}
+
+.fallback-ad i {
+    font-size: 38px;
+    color: var(--p);
+    margin-bottom: 10px;
+}
+
+.reward-footer {
+    padding: 16px 20px 20px;
+    border-top: 1px solid var(--border);
+}
+
+.ad-progress {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 13px;
+}
+
+.ad-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--p);
+    transition: width 1s linear;
+}
+
+.reward-wait-btn,
+.reward-complete-btn {
+    width: 100%;
+    border: none;
+    border-radius: 11px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.reward-wait-btn {
+    background: #e5e7eb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.reward-complete-btn {
+    background: var(--p);
+    color: #fff;
+}
+
+.reward-complete-btn:hover {
+    background: var(--p-dark);
+}
+.phone-reveal-box {
+    background: var(--p-soft);
+    border: 1px solid #9FE1CB;
+    border-radius: 12px;
+    padding: 13px;
+    margin-bottom: 12px;
+}
+
+.phone-label {
+    font-size: 12px;
+    color: var(--p-dark);
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.phone-number {
+    display: block;
+    width: 100%;
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 1px;
+    text-align: left;
+    text-decoration: none;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 13px;
+}
+
+.phone-number-clickable {
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.phone-number-clickable:hover {
+    border-color: var(--p);
+    background: #f9fffc;
+    color: var(--p-dark);
+    transform: translateY(-1px);
+}
+
+button.phone-number {
+    appearance: none;
+}
 </style>
 
 <div class="property-page">
@@ -716,15 +916,28 @@
         </div>
 
         {% if property.owner.phone %}
-          <a href="tel:{{ property.owner.phone }}" class="cta-btn">
-            <i class="ti ti-phone" aria-hidden="true"></i>
-            Call landlord
-          </a>
+            <div class="phone-reveal-box">
+                <div class="phone-label">Landlord Phone</div>
+
+                {% if phone_already_revealed %}
+                    <a href="tel:{{ property.owner.phone }}"
+                      class="phone-number phone-number-clickable"
+                      id="phoneNumber">
+                        {{ property.owner.phone }}
+                    </a>
+                {% else %}
+                    <button type="button"
+                            class="phone-number phone-number-clickable"
+                            id="revealPhoneBtn">
+                        {{ property.owner.phone|slice:":2" }}XXXXXXXX
+                    </button>
+                {% endif %}
+            </div>
         {% else %}
-          <button type="button" class="cta-btn" disabled>
-            <i class="ti ti-phone" aria-hidden="true"></i>
-            Phone unavailable
-          </button>
+            <button type="button" class="cta-btn" disabled>
+                <i class="ti ti-phone" aria-hidden="true"></i>
+                Phone unavailable
+            </button>
         {% endif %}
 
         {% if property.owner.email %}
@@ -1017,12 +1230,62 @@
             Email
           </a>
         {% endif %}
+
+        {% if user.is_authenticated and user.role == 'TENANT' and user != property.owner %}
+            <a href="{% url 'report_property' property.id %}" class="sm-btn sm-btn-outline" style="color:#dc2626;">
+                <i class="ti ti-flag" aria-hidden="true"></i>
+                Report this Property
+            </a>
+        {% endif %}
       </div>
     </div>
   </div>
 
-</div>
 
+</div>
+<!-- advertisement modal -->
+<div class="reward-modal" id="rewardModal">
+    <div class="reward-card">
+
+        <div class="reward-header">
+            <div>
+                <h5>Advertisement</h5>
+                <p>Please watch this short ad to reveal the landlord phone number.</p>
+            </div>
+        </div>
+
+        <div class="reward-body">
+            {% if phone_reveal_ad %}
+                {% if phone_reveal_ad.image %}
+                    <img src="{{ phone_reveal_ad.image.url }}" alt="{{ phone_reveal_ad.title }}">
+                {% endif %}
+
+                <h6>{{ phone_reveal_ad.title }}</h6>
+
+                {% if phone_reveal_ad.description %}
+                    <p>{{ phone_reveal_ad.description }}</p>
+                {% endif %}
+            {% else %}
+                <div class="fallback-ad">
+                    <i class="ti ti-speakerphone"></i>
+                    <h6>Sponsored Ad</h6>
+                    <p>Please wait a few seconds to unlock the phone number.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="reward-footer">
+            <div class="ad-progress">
+                <div class="ad-progress-fill" id="adProgressFill"></div>
+            </div>
+
+            <button type="button" class="reward-wait-btn" id="rewardWaitBtn" disabled>
+                Please wait <span id="adTimer">5</span>s
+            </button>
+        </div>
+
+    </div>
+</div>
 <script>
   function setMain(url, thumb) {
     const img = document.getElementById('mainImg');
@@ -1042,6 +1305,85 @@
 
     thumb.classList.add('active');
   }
+
+    const revealBtn = document.getElementById('revealPhoneBtn');
+    const rewardModal = document.getElementById('rewardModal');
+    const rewardWaitBtn = document.getElementById('rewardWaitBtn');
+    const adTimer = document.getElementById('adTimer');
+    const adProgressFill = document.getElementById('adProgressFill');
+
+    const adDuration = Number("{{ phone_reveal_ad.duration_seconds|default:5 }}");
+
+    let adRunning = false;
+
+    function revealPhoneAfterAd() {
+        fetch("{% url 'reveal_phone_number' property.id %}", {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const phoneLink = document.createElement('a');
+
+                phoneLink.href = "tel:" + data.phone;
+                phoneLink.id = "phoneNumber";
+                phoneLink.className = "phone-number phone-number-clickable";
+                phoneLink.textContent = data.phone;
+
+                revealBtn.replaceWith(phoneLink);
+
+                rewardModal.classList.remove('show');
+            } else {
+                rewardWaitBtn.textContent = data.message || "Phone number unavailable";
+            }
+        })
+        .catch(error => {
+            console.error("Phone reveal failed:", error);
+            rewardWaitBtn.textContent = "Something went wrong";
+        });
+    }
+
+    if (revealBtn) {
+        revealBtn.addEventListener('click', function () {
+            if (adRunning) return;
+
+            adRunning = true;
+
+            rewardModal.classList.add('show');
+
+            let remaining = adDuration;
+            let elapsed = 0;
+
+            adTimer.textContent = remaining;
+            adProgressFill.style.width = '0%';
+            rewardWaitBtn.innerHTML = `Please wait <span id="adTimer">${remaining}</span>s`;
+
+            const timer = setInterval(function () {
+                elapsed++;
+                remaining--;
+
+                const currentTimer = document.getElementById('adTimer');
+
+                if (currentTimer) {
+                    currentTimer.textContent = Math.max(remaining, 0);
+                }
+
+                const progress = (elapsed / adDuration) * 100;
+                adProgressFill.style.width = progress + '%';
+
+                if (remaining <= 0) {
+                    clearInterval(timer);
+
+                    rewardWaitBtn.textContent = "Revealing phone number...";
+
+                    revealPhoneAfterAd();
+                }
+            }, 1000);
+        });
+    }
 </script>
 
 {% endblock %}

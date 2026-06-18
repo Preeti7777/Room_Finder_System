@@ -850,10 +850,10 @@
             Wishlist
           </a>
 
-          <a href="#"
+          <a href="{% url 'my_reports' %}"
              class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
             <i class="ti ti-message-circle"></i>
-            Reports
+             My Reports
           </a>
         {% endif %}
 

@@ -66,3 +66,4 @@ class FacilityForm(ModelForm):
     class Meta:
         model = Facility
         exclude = ['property']
+

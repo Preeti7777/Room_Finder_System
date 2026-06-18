@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Reports{% endblock %}
+
+{% block content %}
+
+<style>
+    :root {
+        --p: #0F6E56;
+        --p-soft: #E1F5EE;
+        --p-dark: #085041;
+        --danger: #dc2626;
+        --warning: #f59e0b;
+        --success: #16a34a;
+        --border: #e5e7eb;
+        --radius: 14px;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --surface: #ffffff;
+        --bg: #f8f9fa;
+    }
+
+    body {
+        background: var(--bg);
+    }
+
+    .reports-page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 28px 18px 60px;
+    }
+
+    .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .page-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 5px;
+    }
+
+    .page-subtitle {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    .reports-count {
+        background: var(--p-soft);
+        color: var(--p-dark);
+        border: 1px solid #9FE1CB;
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .reports-grid {
+        display: grid;
+        gap: 14px;
+    }
+
+    .report-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        box-shadow: 0 10px 26px rgba(15, 110, 86, 0.06);
+    }
+
+    .report-property {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+    }
+
+    .report-property a {
+        color: var(--text);
+        text-decoration: none;
+    }
+
+    .report-property a:hover {
+        color: var(--p);
+    }
+
+    .report-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 12px;
+    }
+
+    .report-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .report-message {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 11px;
+        padding: 12px 14px;
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.65;
+        margin-top: 10px;
+    }
+
+    .report-side {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-reviewed {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-resolved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .view-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        background: var(--p);
+        color: #fff;
+        border-radius: 9px;
+        padding: 9px 13px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .view-btn:hover {
+        background: var(--p-dark);
+        color: #fff;
+    }
+
+    .empty-box {
+        background: var(--surface);
+        border: 1px dashed #cbd5e1;
+        border-radius: var(--radius);
+        padding: 42px 22px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        margin: 0 auto 14px;
+        border-radius: 18px;
+        background: var(--p-soft);
+        color: var(--p);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+    }
+
+    .empty-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+    }
+
+    .empty-text {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    @media (max-width: 680px) {
+        .page-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .report-card {
+            grid-template-columns: 1fr;
+        }
+
+        .report-side {
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="reports-page">
+
+    <div class="page-head">
+        <div>
+            <h2 class="page-title">My Reports</h2>
+            <p class="page-subtitle">
+                Properties you have reported for review.
+            </p>
+        </div>
+
+        <div class="reports-count">
+            {{ reports|length }} report{{ reports|length|pluralize }}
+        </div>
+    </div>
+
+    {% if reports %}
+        <div class="reports-grid">
+            {% for report in reports %}
+                <div class="report-card">
+
+                    <div>
+                        <div class="report-property">
+                            <a href="{% url 'property_detail' report.property.id %}">
+                                {{ report.property.title }}
+                            </a>
+                        </div>
+
+                        <div class="report-meta">
+                            <span>
+                                <i class="ti ti-flag" aria-hidden="true"></i>
+                                {{ report.get_reason_display }}
+                            </span>
+
+                            <span>
+                                <i class="ti ti-calendar" aria-hidden="true"></i>
+                                {{ report.created_at|date:"M d, Y" }}
+                            </span>
+
+                            <span>
+                                <i class="ti ti-map-pin" aria-hidden="true"></i>
+                                {{ report.property.city }}, {{ report.property.district }}
+                            </span>
+                        </div>
+
+                        {% if report.message %}
+                            <div class="report-message">
+                                {{ report.message|linebreaksbr }}
+                            </div>
+                        {% else %}
+                            <div class="report-message">
+                                No additional details were added.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="report-side">
+                        <span class="status-badge status-{{ report.status }}">
+                            <i class="ti ti-circle-filled" aria-hidden="true"></i>
+                            {{ report.get_status_display }}
+                        </span>
+
+                        <a href="{% url 'property_detail' report.property.id %}" class="view-btn">
+                            View Property
+                            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-box">
+            <div class="empty-icon">
+                <i class="ti ti-clipboard-list" aria-hidden="true"></i>
+            </div>
+
+            <div class="empty-title">No reports submitted</div>
+            <p class="empty-text">
+                You have not reported any properties yet.
+            </p>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
