@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends user.is_staff|yesno:"admin_base.html,base.html" %}
 {% load static %}
 
 {% block title %}My Profile{% endblock %}
@@ -74,7 +74,7 @@ body {
   z-index: 5;
 }
 
-.avatar {
+.profile-avatar {
   width: 76px;
   height: 76px;
   border-radius: 50%;
@@ -92,6 +92,12 @@ body {
   z-index: 10;
 }
 
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .profile-header {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -105,203 +111,11 @@ body {
   z-index: 2;
 }
 
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .header-actions {
   display: flex;
   gap: 8px;
   padding-top: 12px;
   flex-wrap: wrap;
-}
-/* edit profile */
-.edit-link-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-/* modal */
-.profile-modal-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 9999;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.profile-modal-backdrop.open {
-  display: flex;
-}
-
-.profile-modal {
-  width: 100%;
-  max-width: 620px;
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-
-.profile-modal-header {
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.profile-modal-header h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.profile-modal-header p {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.modal-close-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: #fff;
-  cursor: pointer;
-}
-
-.profile-form {
-  padding: 20px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-.form-group label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.form-group input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px 12px;
-  font-size: 14px;
-}
-
-.form-group input[type="file"] {
-  padding: 8px;
-  background: var(--bg);
-}
-
-.form-group small {
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-@media(max-width: 520px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-modal-backdrop {
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  .profile-modal {
-    border-radius: 16px 16px 0 0;
-  }
-
-  .modal-actions {
-    flex-direction: column;
-  }
-}
-.form-section h4 {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 14px;
-}
-.file-card {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 12px;
-}
-
-.file-card:last-child {
-  margin-bottom: 0;
-}
-
-.file-card-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: var(--p-soft);
-  color: var(--p);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-.file-card-body small {
-  display: block;
-  font-size: 11px;
-  color: var(--muted);
-  margin: 4px 0 9px;
-  line-height: 1.5;
-}
-
-.profile-file-input {
-  width: 100%;
-  border: 1px dashed #b7c8c0;
-  background: #fff;
-  border-radius: 10px;
-  padding: 10px;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.profile-file-input:hover {
-  border-color: var(--p);
-  background: #fbfffd;
 }
 
 .btn-primary-profile,
@@ -316,6 +130,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
+  font-family: inherit;
 }
 
 .btn-primary-profile {
@@ -432,17 +247,29 @@ body {
   justify-content: space-between;
 }
 
-.edit-link {
-  font-size: 12px;
+.edit-link,
+.setting-link {
   color: var(--p);
   text-decoration: none;
+}
+
+.edit-link {
+  font-size: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.edit-link:hover {
+.edit-link:hover,
+.setting-link:hover {
   color: var(--p-dark);
+}
+
+.edit-link-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .info-grid {
@@ -594,10 +421,20 @@ body {
   justify-content: space-between;
   padding: 11px 0;
   border-bottom: 1px solid var(--border);
+  color: inherit;
 }
 
 .setting-item:last-child {
   border-bottom: none;
+}
+
+.setting-item:hover {
+  background: var(--bg);
+  margin-left: -8px;
+  margin-right: -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: var(--rmd);
 }
 
 .setting-left {
@@ -629,35 +466,6 @@ body {
   font-size: 11px;
   color: var(--muted);
   margin-top: 1px;
-}
-
-.toggle {
-  width: 36px;
-  height: 20px;
-  border-radius: 999px;
-  background: var(--p);
-  position: relative;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.toggle::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 18px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fff;
-}
-
-.toggle.off {
-  background: #d1d5db;
-}
-
-.toggle.off::after {
-  left: 3px;
 }
 
 .chevron-btn {
@@ -724,6 +532,29 @@ body {
   color: #92400e;
 }
 
+.verify-mini-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.verify-mini-pill.verified {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.verify-mini-pill.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.verify-mini-pill.rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .danger-zone {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -761,6 +592,145 @@ body {
   font-size: 13px;
   color: var(--muted);
   padding: 4px 0;
+}
+
+.profile-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.profile-modal-backdrop.open {
+  display: flex;
+}
+
+.profile-modal {
+  width: 100%;
+  max-width: 620px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.profile-modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.profile-modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.profile-modal-header p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+}
+
+.profile-form {
+  padding: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full,
+.form-section {
+  grid-column: 1 / -1;
+}
+
+.form-group label,
+.file-card-body label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-group input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.file-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.file-card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--p-soft);
+  color: var(--p);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.file-card-body small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 4px 0 9px;
+  line-height: 1.5;
+}
+
+.profile-file-input {
+  width: 100%;
+  border: 1px dashed #b7c8c0;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 @media(max-width: 760px) {
@@ -805,83 +775,24 @@ body {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .profile-modal {
+    border-radius: 16px 16px 0 0;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
 }
-
-/* citizenship verification */
-.setting-button {
-  width: 100%;
-  border: none;
-  background: transparent;
-  font-family: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-
-.setting-button:hover {
-  background: var(--bg);
-  margin-left: -8px;
-  margin-right: -8px;
-  padding-left: 8px;
-  padding-right: 8px;
-  border-radius: var(--rmd);
-}
-
-.verify-mini-pill {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.verify-mini-pill.verified {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.verify-mini-pill.pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.verify-mini-pill.rejected {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.verification-note {
-  margin-bottom: 14px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.verification-note.pending {
-  background: #eff6ff;
-  color: #1e40af;
-  border: 1px solid #93c5fd;
-}
-
-.verification-note.verified {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #86efac;
-}
-
-.verification-note.rejected {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-}
-
-.verification-note.default {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fcd34d;
-}
-
-
 </style>
 
 <div class="profile-page">
@@ -901,7 +812,7 @@ body {
 
   <div class="profile-header">
     <div class="avatar-wrap">
-      <div class="avatar">
+      <div class="profile-avatar">
         {% if profile_user.profile_image %}
           <img src="{{ profile_user.profile_image.url }}" alt="{{ profile_user.username }}">
         {% else %}
@@ -928,7 +839,10 @@ body {
 
     <div>
       <span class="user-role">
-        {% if profile_user.role == "LANDLORD" %}
+        {% if profile_user.is_staff %}
+          <i class="ti ti-shield-star" aria-hidden="true" style="font-size:12px"></i>
+          Admin / Staff
+        {% elif profile_user.role == "LANDLORD" %}
           <i class="ti ti-home" aria-hidden="true" style="font-size:12px"></i>
           Property owner
         {% else %}
@@ -961,7 +875,28 @@ body {
     </div>
 
     <div class="stats-row">
-      {% if profile_user.role == "LANDLORD" %}
+      {% if profile_user.is_staff %}
+        <div class="stat-card">
+          <div class="stat-num">{{ total_users }}</div>
+          <div class="stat-label">Users</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-num">{{ total_properties }}</div>
+          <div class="stat-label">Properties</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-num">{{ property_pending_count }}</div>
+          <div class="stat-label">Pending Properties</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-num">{{ certificate_pending_count }}</div>
+          <div class="stat-label">Pending Certificates</div>
+        </div>
+
+      {% elif profile_user.role == "LANDLORD" %}
         <div class="stat-card">
           <div class="stat-num">{{ total_listings }}</div>
           <div class="stat-label">Listings</div>
@@ -981,6 +916,7 @@ body {
           <div class="stat-num">{{ rejected_count }}</div>
           <div class="stat-label">Rejected</div>
         </div>
+
       {% else %}
         <div class="stat-card">
           <div class="stat-num">{{ wishlist_count }}</div>
@@ -1047,7 +983,11 @@ body {
           <div class="info-item">
             <div class="info-label">Role</div>
             <div class="info-value">
-              {{ profile_user.get_role_display }}
+              {% if profile_user.is_staff %}
+                Admin / Staff
+              {% else %}
+                {{ profile_user.get_role_display }}
+              {% endif %}
             </div>
           </div>
 
@@ -1060,114 +1000,227 @@ body {
         </div>
       </div>
 
-      {% if profile_user.role == "LANDLORD" %}
-      <div class="profile-card">
-        <div class="card-title-profile">
-          My listings
-          <a href="{% url 'property_list' %}" class="edit-link">
-            View all
-            <i class="ti ti-arrow-right" aria-hidden="true"></i>
-          </a>
-        </div>
+      {% if profile_user.is_staff %}
 
-        {% for prop in my_properties %}
-          <div class="listing-item">
-            <div class="listing-thumb">
-              {% with img=prop.get_primary_image %}
-                {% if img %}
-                  <img src="{{ img.image.url }}" alt="{{ prop.title }}">
-                {% else %}
-                  <i class="ti ti-building" aria-hidden="true" style="font-size:23px;color:var(--p)"></i>
-                {% endif %}
-              {% endwith %}
+        <div class="profile-card">
+          <div class="card-title-profile">
+            Admin overview
+            <a href="{% url 'verification_list' %}" class="edit-link">
+              Property verification
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Landlords</div>
+              <div class="info-value">{{ total_landlords }}</div>
             </div>
 
-            <div class="listing-info">
-              <div class="listing-name">
-                {{ prop.title }}
-              </div>
+            <div class="info-item">
+              <div class="info-label">Tenants</div>
+              <div class="info-value">{{ total_tenants }}</div>
+            </div>
 
-              <div class="listing-loc">
-                <i class="ti ti-map-pin" aria-hidden="true" style="font-size:12px"></i>
-                {{ prop.area }}, {{ prop.city }}
-              </div>
+            <div class="info-item">
+              <div class="info-label">Approved properties</div>
+              <div class="info-value">{{ property_approved_count }}</div>
+            </div>
 
-              <div class="listing-footer">
-                <span class="listing-price">
-                  Rs {{ prop.monthly_rent|floatformat:0 }}/mo
-                </span>
-
-                {% if prop.status == "approved" %}
-                  <span class="status-pill pill-approved">Approved</span>
-                {% elif prop.status == "pending" %}
-                  <span class="status-pill pill-pending">Pending</span>
-                {% else %}
-                  <span class="status-pill pill-rejected">Rejected</span>
-                {% endif %}
-              </div>
+            <div class="info-item">
+              <div class="info-label">Rejected properties</div>
+              <div class="info-value">{{ property_rejected_count }}</div>
             </div>
           </div>
-        {% empty %}
-          <p class="empty-small">
-            You have not added any property listings yet.
-          </p>
-        {% endfor %}
-      </div>
+        </div>
+
+        <div class="profile-card">
+          <div class="card-title-profile">
+            Pending property reviews
+            <a href="{% url 'verification_list' %}" class="edit-link">
+              View all
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          {% for prop in recent_pending_properties %}
+            <div class="listing-item">
+              <div class="listing-thumb">
+                {% with img=prop.get_primary_image %}
+                  {% if img %}
+                    <img src="{{ img.image.url }}" alt="{{ prop.title }}">
+                  {% else %}
+                    <i class="ti ti-building" aria-hidden="true" style="font-size:23px;color:var(--p)"></i>
+                  {% endif %}
+                {% endwith %}
+              </div>
+
+              <div class="listing-info">
+                <div class="listing-name">
+                  {{ prop.title }}
+                </div>
+
+                <div class="listing-loc">
+                  <i class="ti ti-user" aria-hidden="true" style="font-size:12px"></i>
+                  {{ prop.owner.get_full_name|default:prop.owner.username }}
+                </div>
+
+                <div class="listing-footer">
+                  <span class="listing-price">
+                    Rs {{ prop.monthly_rent|floatformat:0 }}/mo
+                  </span>
+
+                  <!-- <a href="{% url 'property_verification_detail' prop.id %}" class="edit-link">
+                    Review
+                  </a> -->
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p class="empty-small">
+              No pending property reviews.
+            </p>
+          {% endfor %}
+        </div>
+
+      {% elif profile_user.role == "LANDLORD" %}
+
+        <div class="profile-card">
+          <div class="card-title-profile">
+            My listings
+            <a href="{% url 'property_list' %}" class="edit-link">
+              View all
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          {% for prop in my_properties %}
+            <div class="listing-item">
+              <div class="listing-thumb">
+                {% with img=prop.get_primary_image %}
+                  {% if img %}
+                    <img src="{{ img.image.url }}" alt="{{ prop.title }}">
+                  {% else %}
+                    <i class="ti ti-building" aria-hidden="true" style="font-size:23px;color:var(--p)"></i>
+                  {% endif %}
+                {% endwith %}
+              </div>
+
+              <div class="listing-info">
+                <div class="listing-name">
+                  {{ prop.title }}
+                </div>
+
+                <div class="listing-loc">
+                  <i class="ti ti-map-pin" aria-hidden="true" style="font-size:12px"></i>
+                  {{ prop.area }}, {{ prop.city }}
+                </div>
+
+                <div class="listing-footer">
+                  <span class="listing-price">
+                    Rs {{ prop.monthly_rent|floatformat:0 }}/mo
+                  </span>
+
+                  {% if prop.status == "approved" %}
+                    <span class="status-pill pill-approved">Approved</span>
+                  {% elif prop.status == "pending" %}
+                    <span class="status-pill pill-pending">Pending</span>
+                  {% else %}
+                    <span class="status-pill pill-rejected">Rejected</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p class="empty-small">
+              You have not added any property listings yet.
+            </p>
+          {% endfor %}
+        </div>
+
       {% else %}
-      <div class="profile-card">
-        <div class="card-title-profile">
-          My wishlist
-          <a href="{% url 'property_list' %}" class="edit-link">
-            Browse properties
-            <i class="ti ti-arrow-right" aria-hidden="true"></i>
-          </a>
+
+        <div class="profile-card">
+          <div class="card-title-profile">
+            My wishlist
+            <a href="{% url 'wishlist_list' %}" class="edit-link">
+              View all
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          {% for item in wishlist_items %}
+            <div class="listing-item">
+              <div class="listing-thumb">
+                {% with img=item.property.get_primary_image %}
+                  {% if img %}
+                    <img src="{{ img.image.url }}" alt="{{ item.property.title }}">
+                  {% else %}
+                    <i class="ti ti-home-heart" aria-hidden="true" style="font-size:23px;color:var(--p)"></i>
+                  {% endif %}
+                {% endwith %}
+              </div>
+
+              <div class="listing-info">
+                <div class="listing-name">
+                  {{ item.property.title }}
+                </div>
+
+                <div class="listing-loc">
+                  <i class="ti ti-map-pin" aria-hidden="true" style="font-size:12px"></i>
+                  {{ item.property.area }}, {{ item.property.city }}
+                </div>
+
+                <div class="listing-footer">
+                  <span class="listing-price">
+                    Rs {{ item.property.monthly_rent|floatformat:0 }}/mo
+                  </span>
+
+                  <a href="{% url 'property_detail' item.property.id %}" class="edit-link">
+                    View
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p class="empty-small">
+              You have not added any properties to your wishlist yet.
+            </p>
+          {% endfor %}
         </div>
 
-        {% for item in wishlist_items %}
-          <div class="listing-item">
-            <div class="listing-thumb">
-              {% with img=item.property.get_primary_image %}
-                {% if img %}
-                  <img src="{{ img.image.url }}" alt="{{ item.property.title }}">
-                {% else %}
-                  <i class="ti ti-home-heart" aria-hidden="true" style="font-size:23px;color:var(--p)"></i>
-                {% endif %}
-              {% endwith %}
-            </div>
-
-            <div class="listing-info">
-              <div class="listing-name">
-                {{ item.property.title }}
-              </div>
-
-              <div class="listing-loc">
-                <i class="ti ti-map-pin" aria-hidden="true" style="font-size:12px"></i>
-                {{ item.property.area }}, {{ item.property.city }}
-              </div>
-
-              <div class="listing-footer">
-                <span class="listing-price">
-                  Rs {{ item.property.monthly_rent|floatformat:0 }}/mo
-                </span>
-
-                <a href="{% url 'property_detail' item.property.id %}" class="edit-link">
-                  View
-                </a>
-              </div>
-            </div>
-          </div>
-        {% empty %}
-          <p class="empty-small">
-            You have not added any properties to your wishlist yet.
-          </p>
-        {% endfor %}
-      </div>
       {% endif %}
 
       <div class="profile-card" style="margin-bottom:0">
         <div class="card-title-profile">Recent activity</div>
 
-        {% if profile_user.role == "LANDLORD" %}
+        {% if profile_user.is_staff %}
+
+          {% for landlord in recent_pending_certificates %}
+            <div class="activity-item">
+              <div class="act-icon">
+                <i class="ti ti-id" aria-hidden="true"></i>
+              </div>
+
+              <div>
+                <div class="act-text">
+                  <strong>{{ landlord.get_full_name|default:landlord.username }}</strong>
+                  submitted certificate verification.
+                </div>
+
+                <div class="act-time">
+                  Status: {{ landlord.get_verification_status_display }}
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p class="empty-small">
+              No pending certificate verification activity.
+            </p>
+          {% endfor %}
+
+        {% elif profile_user.role == "LANDLORD" %}
+
           {% for prop in my_properties|slice:":3" %}
             <div class="activity-item">
               <div class="act-icon">
@@ -1192,7 +1245,9 @@ body {
           {% empty %}
             <p class="empty-small">No recent activity yet.</p>
           {% endfor %}
+
         {% else %}
+
           {% for item in wishlist_items|slice:":3" %}
             <div class="activity-item">
               <div class="act-icon">
@@ -1211,6 +1266,7 @@ body {
           {% empty %}
             <p class="empty-small">No recent activity yet.</p>
           {% endfor %}
+
         {% endif %}
       </div>
     </div>
@@ -1219,21 +1275,56 @@ body {
       <div class="profile-card">
         <div class="card-title-profile">Account settings</div>
 
-        <div class="setting-item">
+        <a href="{% url 'change_password' %}" class="setting-item setting-link" style="text-decoration:none;">
+        
           <div class="setting-left">
             <div class="setting-icon">
               <i class="ti ti-lock" aria-hidden="true"></i>
             </div>
             <div>
-              <div class="setting-name">Change password</div>
-              <div class="setting-sub">Update credentials</div>
+              <div class="setting-name">
+                    Change Password
+              </div>
+              <div class="setting-sub">Update your password</div>
             </div>
           </div>
           <i class="ti ti-chevron-right chevron-btn" aria-hidden="true"></i>
-        </div>
+        </a>
 
-        {% if profile_user.role == "LANDLORD" %}
-          <a href="{% url 'verify_account' %}" class="setting-item setting-link" style="text-decoration:none;">
+        {% if profile_user.is_staff %}
+          <a href="{% url 'verification_list' %}" class="setting-item setting-link">
+            <div class="setting-left">
+              <div class="setting-icon">
+                <i class="ti ti-building-check" aria-hidden="true"></i>
+              </div>
+
+              <div>
+                <div class="setting-name">Property verification</div>
+                <div class="setting-sub">Review pending property listings</div>
+              </div>
+            </div>
+
+            <span class="verify-mini-pill pending">{{ property_pending_count }}</span>
+          </a>
+
+          <a href="{% url 'certificate_verification_list' %}" class="setting-item setting-link">
+            <div class="setting-left">
+              <div class="setting-icon">
+                <i class="ti ti-id" aria-hidden="true"></i>
+              </div>
+
+              <div>
+                <div class="setting-name">Certificate verification</div>
+                <div class="setting-sub">Review landlord certificates</div>
+              </div>
+            </div>
+
+            <span class="verify-mini-pill pending">{{ certificate_pending_count }}</span>
+          </a>
+        {% endif %}
+
+        {% if profile_user.role == "LANDLORD" and not profile_user.is_staff %}
+          <a href="{% url 'verify_account' %}" class="setting-item setting-link">
             <div class="setting-left">
               <div class="setting-icon">
                 <i class="ti ti-shield-check" aria-hidden="true"></i>
@@ -1264,31 +1355,29 @@ body {
               <i class="ti ti-chevron-right chevron-btn" aria-hidden="true"></i>
             {% endif %}
           </a>
+
+          <a href="{% url 'documents' %}" class="setting-item setting-link">
+            <div class="setting-left">
+              <div class="setting-icon">
+                <i class="ti ti-files" aria-hidden="true"></i>
+              </div>
+
+              <div>
+                <div class="setting-name">My documents</div>
+                <div class="setting-sub">View uploaded citizenship documents</div>
+              </div>
+            </div>
+
+            <i class="ti ti-chevron-right chevron-btn" aria-hidden="true"></i>
+          </a>
         {% endif %}
-        {% if profile_user.role == "LANDLORD" and not profile_user.is_staff %}
-        <a href="{% url 'documents' %}" class="setting-item setting-link" style="text-decoration:none;">
-          <div class="setting-left">
-            <div class="setting-icon">
-              <i class="ti ti-files" aria-hidden="true"></i>
-            </div>
-
-            <div>
-              <div class="setting-name">My documents</div>
-              <div class="setting-sub">View uploaded citizenship documents</div>
-            </div>
-          </div>
-
-          <i class="ti ti-chevron-right chevron-btn" aria-hidden="true"></i>
-        </a>
-      {% endif %}
       </div>
-      
+
       <div class="profile-card">
         <div class="card-title-profile">Verification status</div>
 
         <div class="verify-box">
 
-          <!-- Email -->
           <div class="verify-item {% if profile_user.email %}done{% endif %}">
             <div class="verify-left {% if profile_user.email %}done{% else %}pending{% endif %}">
               <i class="ti ti-mail" aria-hidden="true"></i>
@@ -1302,7 +1391,6 @@ body {
             {% endif %}
           </div>
 
-          <!-- Phone -->
           <div class="verify-item {% if profile_user.phone %}done{% endif %}">
             <div class="verify-left {% if profile_user.phone %}done{% else %}pending{% endif %}">
               <i class="ti ti-phone" aria-hidden="true"></i>
@@ -1316,7 +1404,6 @@ body {
             {% endif %}
           </div>
 
-          <!-- Profile Image -->
           <div class="verify-item {% if profile_user.profile_image %}done{% endif %}">
             <div class="verify-left {% if profile_user.profile_image %}done{% else %}pending{% endif %}">
               <i class="ti ti-photo" aria-hidden="true"></i>
@@ -1330,9 +1417,18 @@ body {
             {% endif %}
           </div>
 
-          <!-- Citizenship verification only for landlords -->
-          {% if profile_user.role == "LANDLORD" %}
+          {% if profile_user.is_staff %}
+            <div class="verify-item done">
+              <div class="verify-left done">
+                <i class="ti ti-shield-star" aria-hidden="true"></i>
+                Staff access
+              </div>
 
+              <span class="verify-pill done">Enabled</span>
+            </div>
+          {% endif %}
+
+          {% if profile_user.role == "LANDLORD" and not profile_user.is_staff %}
             <div class="verify-item {% if profile_user.citizenship_front_image %}done{% endif %}">
               <div class="verify-left {% if profile_user.citizenship_front_image %}done{% else %}pending{% endif %}">
                 <i class="ti ti-id" aria-hidden="true"></i>
@@ -1371,7 +1467,6 @@ body {
                 <span class="verify-pill pending">Missing</span>
               {% endif %}
             </div>
-
           {% endif %}
 
         </div>
@@ -1392,13 +1487,14 @@ body {
 
   </div>
 </div>
+
 <div class="profile-modal-backdrop" id="editProfileModal">
   <div class="profile-modal">
 
     <div class="profile-modal-header">
       <div>
         <h3>Edit profile</h3>
-        <p>Update your personal information and verification documents.</p>
+        <p>Update your personal information.</p>
       </div>
 
       <button type="button" class="modal-close-btn" onclick="closeEditModal()">
@@ -1443,39 +1539,28 @@ body {
           {% endif %}
         </div>
 
-        <!-- <div class="form-group full">
-          <label>Profile image</label>
-          {{ form.profile_image }}
-
-          {% if profile_user.profile_image %}
-            <small>
-              Current profile image already uploaded.
-            </small>
-          {% endif %}
-        </div> -->
         <div class="form-section">
-        <h4>Profile photo</h4>
+          <div class="file-card">
+            <div class="file-card-icon">
+              <i class="ti ti-user-circle"></i>
+            </div>
 
-        <div class="file-card">
-          <div class="file-card-icon">
-            <i class="ti ti-user-circle"></i>
-          </div>
+            <div class="file-card-body">
+              <label>Profile image</label>
 
-          <div class="file-card-body">
-            <label>Profile image</label>
+              {% if profile_user.profile_image %}
+                <small>Current profile image is already uploaded.</small>
+              {% else %}
+                <small>Upload a clear profile photo.</small>
+              {% endif %}
 
-            {% if profile_user.profile_image %}
-              <small>Current profile image is already uploaded.</small>
-            {% else %}
-              <small>Upload a clear profile photo.</small>
-            {% endif %}
-
-            {{ form.profile_image }}
+              {{ form.profile_image }}
+            </div>
           </div>
         </div>
+
       </div>
-      </div>
-      
+
       <div class="modal-actions">
         <button type="button" class="btn-outline-profile" onclick="closeEditModal()">
           Cancel
@@ -1489,6 +1574,7 @@ body {
 
   </div>
 </div>
+
 <script>
   function openEditModal() {
     document.getElementById("editProfileModal").classList.add("open");
@@ -1504,4 +1590,5 @@ body {
     }
   });
 </script>
+
 {% endblock %}

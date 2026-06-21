@@ -1275,18 +1275,21 @@ body {
       <div class="profile-card">
         <div class="card-title-profile">Account settings</div>
 
-        <div class="setting-item">
+        <a href="{% url 'change_password' %}" class="setting-item setting-link" style="text-decoration:none;">
+        
           <div class="setting-left">
             <div class="setting-icon">
               <i class="ti ti-lock" aria-hidden="true"></i>
             </div>
             <div>
-              <div class="setting-name">Change password</div>
-              <div class="setting-sub">Update credentials</div>
+              <div class="setting-name">
+                    Change Password
+              </div>
+              <div class="setting-sub">Update your password</div>
             </div>
           </div>
           <i class="ti ti-chevron-right chevron-btn" aria-hidden="true"></i>
-        </div>
+        </a>
 
         {% if profile_user.is_staff %}
           <a href="{% url 'verification_list' %}" class="setting-item setting-link">

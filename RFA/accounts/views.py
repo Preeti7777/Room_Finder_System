@@ -47,7 +47,7 @@ def login_view(request):
             login(request, user)
 
             if user.is_staff:
-                return redirect('admin_profile')
+                return redirect('profile')
             else:
                 return redirect('property_list')
 

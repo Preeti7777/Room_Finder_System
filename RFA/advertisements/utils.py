@@ -18,4 +18,4 @@ def get_phone_reveal_ad():
         position='phone_reveal',
         ad_type='rewarded',
         is_active=True
-    ).first()
+    ).order_by("?").first()
