@@ -50,5 +50,10 @@ urlpatterns = [
     'detail/<int:pk>/reveal-phone/',
     views.reveal_phone_number,
     name='reveal_phone_number'
-),
+    ),
+    path(
+        "my-properties/",
+        views.my_properties,
+        name="my_properties",
+    ),
 ]

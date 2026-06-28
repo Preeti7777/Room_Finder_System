@@ -1084,7 +1084,7 @@ body {
         <div class="profile-card">
           <div class="card-title-profile">
             My listings
-            <a href="{% url 'property_list' %}" class="edit-link">
+            <a href="{% url 'my_properties' %}" class="edit-link">
               View all
               <i class="ti ti-arrow-right" aria-hidden="true"></i>
             </a>
@@ -1474,10 +1474,17 @@ body {
           Danger zone
         </div>
 
-        <button type="button" class="danger-btn">
-          <i class="ti ti-trash" aria-hidden="true"></i>
-          Delete account
-        </button>
+        <form method="POST" action="{% url 'delete_account' %}">
+            {% csrf_token %}
+            <button
+                type="submit"
+                class="danger-btn"
+                onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')"
+            >
+                <i class="ti ti-trash" aria-hidden="true"></i>
+                Delete account
+            </button>
+        </form>
       </div>
     </div>
 

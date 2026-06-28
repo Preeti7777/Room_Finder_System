@@ -60,8 +60,10 @@ def approve_property(request, pk):
         return redirect("verification_detail", pk=pk)
 
     property.status = "approved"
-    # property.reviewed_by = request.user
-    property.save(update_fields=["status"])
+    property.reviewed_by = request.user
+    property.reviewed_at = timezone.now()
+    property.rejection_reason = ""          # clear any previous reason
+    property.save(update_fields=["status", "reviewed_by", "reviewed_at", "rejection_reason"])
 
     messages.success(request, f'"{property.title}" has been approved.')
     return redirect("verification_list")
@@ -76,10 +78,17 @@ def reject_property(request, pk):
         messages.info(request, f'"{property.title}" is already rejected.')
         return redirect("verification_detail", pk=pk)
 
+    reason = request.POST.get("rejection_reason", "").strip()
+
+    if not reason:
+        messages.error(request, "Please provide a rejection reason.")
+        return redirect("verification_detail", pk=pk)
+
     property.status = "rejected"
-    # property.reviewed_by = request.user
-    # property.rejection_reason = request.POST.get("rejection_reason", "").strip()
-    property.save(update_fields=["status"])
+    property.reviewed_by = request.user
+    property.reviewed_at = timezone.now()
+    property.rejection_reason = reason
+    property.save(update_fields=["status", "reviewed_by", "reviewed_at", "rejection_reason"])
 
     messages.success(request, f'"{property.title}" has been rejected.')
     return redirect("verification_list")

@@ -737,6 +737,9 @@
   data-status="{{ p.status }}"
   data-approve-url="{% url 'approve_property' p.id %}"
   data-reject-url="{% url 'reject_property' p.id %}"
+  data-rejection-reason="{{ p.rejection_reason|escape }}"
+  data-reviewed-at="{{ p.reviewed_at|date:'M d, Y H:i'|default:'' }}"
+  data-reviewed-by="{{ p.reviewed_by.get_full_name|default:p.reviewed_by|default:''|escape }}"
 >
   <div class="detail-section-label">Property details</div>
 
@@ -904,6 +907,14 @@
       </div>
     </div>
   </div>
+  <div class="detail-section-label"
+        {% if p.status != 'rejected' or not p.rejection_reason %}style="display:none"{% endif %}>
+    Rejection reason
+  </div>
+  <div class="desc-box" style="color:#A32D2D;"
+        {% if p.status != 'rejected' or not p.rejection_reason %}style="display:none"{% endif %}>
+    {{ p.rejection_reason }}
+  </div>
 </div>
 {% endfor %}
 
@@ -930,89 +941,229 @@
 const CSRF = "{{ csrf_token }}";
 
 function getStatusBadge(status) {
-  if (status === "pending") {
+  if (status === "pending")
     return '<span class="status-badge badge-pending"><span class="badge-dot"></span> Pending</span>';
-  }
-
-  if (status === "approved") {
+  if (status === "approved")
     return '<span class="status-badge badge-approved"><span class="badge-dot"></span> Approved</span>';
-  }
-
   return '<span class="status-badge badge-rejected"><span class="badge-dot"></span> Rejected</span>';
 }
 
-function submitAction(url) {
-  if (!url) {
-    console.error("Action URL missing.");
-    return;
-  }
-
+function submitAction(url, extraFields = {}) {
   const form = document.createElement("form");
   form.method = "POST";
   form.action = url;
 
-  const csrfInput = document.createElement("input");
-  csrfInput.type = "hidden";
-  csrfInput.name = "csrfmiddlewaretoken";
-  csrfInput.value = CSRF;
+  const csrf = document.createElement("input");
+  csrf.type = "hidden";
+  csrf.name = "csrfmiddlewaretoken";
+  csrf.value = CSRF;
+  form.appendChild(csrf);
 
-  form.appendChild(csrfInput);
+  for (const [name, value] of Object.entries(extraFields)) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  }
+
   document.body.appendChild(form);
   form.submit();
+}
+
+function buildRejectFlow(rejectUrl, currentReason) {
+  // Step 1: show textarea, confirm button
+  const reasonInput = document.getElementById("modal-reject-reason");
+  const rejectConfirmBtn = document.getElementById("modal-reject-confirm");
+  const rejectInitBtn = document.getElementById("modal-reject-init");
+  const reasonWrap = document.getElementById("modal-reason-wrap");
+
+  if (reasonInput && rejectConfirmBtn && reasonWrap) {
+    // already built, just toggle
+    reasonWrap.style.display = "block";
+    rejectInitBtn && (rejectInitBtn.style.display = "none");
+    reasonInput.value = "";
+    reasonInput.focus();
+
+    rejectConfirmBtn.onclick = function () {
+      const reason = reasonInput.value.trim();
+      if (!reason) {
+        reasonInput.style.borderColor = "#A32D2D";
+        reasonInput.placeholder = "Rejection reason is required.";
+        reasonInput.focus();
+        return;
+      }
+      submitAction(rejectUrl, { rejection_reason: reason });
+    };
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   const modalElement = document.getElementById("propertyModal");
   const modal = new bootstrap.Modal(modalElement);
 
-  const modalTitle = document.getElementById("propertyModalTitle");
-  const modalBody = document.getElementById("propertyModalBody");
-  const modalStatus = document.getElementById("propertyModalStatus");
+  const modalTitle   = document.getElementById("propertyModalTitle");
+  const modalBody    = document.getElementById("propertyModalBody");
+  const modalStatus  = document.getElementById("propertyModalStatus");
   const modalActions = document.getElementById("propertyModalActions");
+
+  // Reset inline reason UI when modal is hidden
+  modalElement.addEventListener("hidden.bs.modal", function () {
+    const wrap = document.getElementById("modal-reason-wrap");
+    if (wrap) wrap.style.display = "none";
+    const initBtn = document.getElementById("modal-reject-init");
+    if (initBtn) initBtn.style.display = "";
+  });
 
   document.querySelectorAll(".view-btn").forEach(function (button) {
     button.addEventListener("click", function () {
       const propertyId = this.dataset.propertyId;
-      const detailTemplate = document.getElementById(`property-detail-${propertyId}`);
+      const tpl = document.getElementById(`property-detail-${propertyId}`);
+      if (!tpl) return;
 
-      if (!detailTemplate) {
-        console.error(`Property detail not found for ID: ${propertyId}`);
-        return;
-      }
-
-      const title = detailTemplate.dataset.title || "Property details";
-      const status = detailTemplate.dataset.status || "pending";
-      const approveUrl = detailTemplate.dataset.approveUrl;
-      const rejectUrl = detailTemplate.dataset.rejectUrl;
+      const title          = tpl.dataset.title || "Property details";
+      const status         = tpl.dataset.status || "pending";
+      const approveUrl     = tpl.dataset.approveUrl;
+      const rejectUrl      = tpl.dataset.rejectUrl;
+      const rejectionReason = tpl.dataset.rejectionReason || "";
+      const reviewedAt     = tpl.dataset.reviewedAt || "";
+      const reviewedBy     = tpl.dataset.reviewedBy || "";
 
       modalTitle.textContent = title;
-      modalBody.innerHTML = detailTemplate.innerHTML;
-      modalStatus.innerHTML = "Current status: " + getStatusBadge(status);
+      modalBody.innerHTML = tpl.innerHTML;
 
+      // Status + review meta
+      let statusHtml = "Current status: " + getStatusBadge(status);
+      if (reviewedAt) {
+        statusHtml += `<span class="ms-2 text-muted" style="font-size:12px;">
+          Reviewed by ${reviewedBy || "admin"} on ${reviewedAt}
+        </span>`;
+      }
+      modalStatus.innerHTML = statusHtml;
+
+      // Build action buttons
       if (status === "pending") {
         modalActions.innerHTML = `
-          <button type="button" class="action-btn btn-reject" onclick="submitAction('${rejectUrl}')">
-            <i class="ti ti-x" aria-hidden="true"></i>
-            Reject
+          <button type="button" class="action-btn btn-reject" id="modal-reject-init">
+            <i class="ti ti-x" aria-hidden="true"></i> Reject
           </button>
-
           <button type="button" class="action-btn btn-approve" onclick="submitAction('${approveUrl}')">
-            <i class="ti ti-check" aria-hidden="true"></i>
-            Approve
+            <i class="ti ti-check" aria-hidden="true"></i> Approve
           </button>
         `;
+
+        document.getElementById("modal-reject-init").addEventListener("click", function () {
+          // Inject reason UI into modal body
+          let reasonWrap = document.getElementById("modal-reason-wrap");
+          if (!reasonWrap) {
+            reasonWrap = document.createElement("div");
+            reasonWrap.id = "modal-reason-wrap";
+            reasonWrap.style.cssText = "margin-top:16px; padding-top:14px; border-top:0.5px solid var(--admin-border);";
+            reasonWrap.innerHTML = `
+              <div class="detail-section-label" style="margin-top:0;">Rejection reason</div>
+              <textarea
+                id="modal-reject-reason"
+                rows="3"
+                class="form-control"
+                style="font-size:13px; border-radius:8px; border:0.5px solid #d4d4d4; resize:vertical;"
+                placeholder="Explain why this property is being rejected..."
+              ></textarea>
+              <div class="d-flex justify-content-end gap-2 mt-2">
+                <button type="button" class="action-btn btn-reject" id="modal-reject-confirm">
+                  <i class="ti ti-send" aria-hidden="true"></i> Confirm rejection
+                </button>
+              </div>
+            `;
+            modalBody.appendChild(reasonWrap);
+            // scroll to it
+            reasonWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          } else {
+            reasonWrap.style.display = "block";
+          }
+
+          this.style.display = "none";
+
+          document.getElementById("modal-reject-confirm").onclick = function () {
+            const textarea = document.getElementById("modal-reject-reason");
+            const reason = textarea.value.trim();
+            if (!reason) {
+              textarea.style.borderColor = "#A32D2D";
+              textarea.placeholder = "Rejection reason is required.";
+              textarea.focus();
+              return;
+            }
+            submitAction(rejectUrl, { rejection_reason: reason });
+          };
+        });
+
       } else if (status === "approved") {
         modalActions.innerHTML = `
-          <button type="button" class="action-btn btn-reject" onclick="submitAction('${rejectUrl}')">
-            <i class="ti ti-x" aria-hidden="true"></i>
-            Revoke approval
+          <button type="button" class="action-btn btn-reject" id="modal-reject-init">
+            <i class="ti ti-x" aria-hidden="true"></i> Revoke approval
           </button>
         `;
+
+        document.getElementById("modal-reject-init").addEventListener("click", function () {
+          let reasonWrap = document.getElementById("modal-reason-wrap");
+          if (!reasonWrap) {
+            reasonWrap = document.createElement("div");
+            reasonWrap.id = "modal-reason-wrap";
+            reasonWrap.style.cssText = "margin-top:16px; padding-top:14px; border-top:0.5px solid var(--admin-border);";
+            reasonWrap.innerHTML = `
+              <div class="detail-section-label" style="margin-top:0;">Rejection reason</div>
+              <textarea
+                id="modal-reject-reason"
+                rows="3"
+                class="form-control"
+                style="font-size:13px; border-radius:8px; border:0.5px solid #d4d4d4; resize:vertical;"
+                placeholder="Explain why this approval is being revoked..."
+              ></textarea>
+              <div class="d-flex justify-content-end gap-2 mt-2">
+                <button type="button" class="action-btn btn-reject" id="modal-reject-confirm">
+                  <i class="ti ti-send" aria-hidden="true"></i> Confirm rejection
+                </button>
+              </div>
+            `;
+            modalBody.appendChild(reasonWrap);
+            reasonWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          } else {
+            reasonWrap.style.display = "block";
+          }
+
+          this.style.display = "none";
+
+          document.getElementById("modal-reject-confirm").onclick = function () {
+            const textarea = document.getElementById("modal-reject-reason");
+            const reason = textarea.value.trim();
+            if (!reason) {
+              textarea.style.borderColor = "#A32D2D";
+              textarea.placeholder = "Rejection reason is required.";
+              textarea.focus();
+              return;
+            }
+            submitAction(rejectUrl, { rejection_reason: reason });
+          };
+        });
+
       } else {
+        // Already rejected — show existing reason, offer approve instead
+        let reasonSection = "";
+        if (rejectionReason) {
+          reasonSection = `
+            <div style="margin-top:16px; padding:12px 14px; background:#FCEBEB; border-radius:9px; font-size:13px; color:#A32D2D;">
+              <strong>Rejection reason:</strong> ${rejectionReason}
+            </div>
+          `;
+          // inject after modal body loads
+          setTimeout(() => {
+            const body = document.getElementById("propertyModalBody");
+            if (body) body.insertAdjacentHTML("beforeend", reasonSection);
+          }, 0);
+        }
+
         modalActions.innerHTML = `
           <button type="button" class="action-btn btn-approve" onclick="submitAction('${approveUrl}')">
-            <i class="ti ti-check" aria-hidden="true"></i>
-            Approve instead
+            <i class="ti ti-check" aria-hidden="true"></i> Approve instead
           </button>
         `;
       }

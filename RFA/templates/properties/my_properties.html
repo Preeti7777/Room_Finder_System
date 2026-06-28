@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Properties{% endblock %}
+
+{% block content %}
+
+<style>
+  .props-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 32px 64px;
+  }
+
+  .props-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    gap: 16px;
+  }
+
+  .props-header h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .props-header p {
+    color: var(--muted);
+    font-size: .9rem;
+  }
+
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: var(--accent-dark); color: #fff; }
+
+  .props-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .props-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .props-table thead tr {
+    background: #f9fafb;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .props-table thead th {
+    padding: 13px 16px;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--muted);
+    text-align: left;
+  }
+
+  .props-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
+  }
+
+  .props-table tbody tr:last-child { border-bottom: none; }
+  .props-table tbody tr:hover { background: #f9fafb; }
+  .props-table td { padding: 14px 16px; vertical-align: middle; font-size: .88rem; }
+
+  .prop-cell { display: flex; align-items: center; gap: 14px; min-width: 260px; }
+
+  .prop-thumb {
+    width: 88px;
+    height: 66px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .prop-thumb-placeholder {
+    width: 88px;
+    height: 66px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: .72rem;
+    flex-shrink: 0;
+  }
+
+  .prop-title {
+    font-weight: 700;
+    font-size: .92rem;
+    margin-bottom: 5px;
+    color: var(--text);
+  }
+
+  .prop-type-pill {
+    font-size: .72rem;
+    color: var(--accent);
+    font-weight: 600;
+    background: var(--accent-lt);
+    padding: 2px 9px;
+    border-radius: 99px;
+    display: inline-block;
+  }
+
+  .loc-city { font-weight: 600; color: var(--text); font-size: .87rem; }
+  .loc-district { color: var(--muted); font-size: .78rem; margin-top: 2px; }
+
+  .rent-amount { font-weight: 700; font-size: .97rem; }
+  .rent-label { color: var(--muted); font-size: .72rem; }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 99px;
+    font-size: .73rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .badge-approved  { background: #dcfce7; color: #166534; }
+  .badge-pending   { background: #fef3c7; color: #b45309; }
+  .badge-rejected  { background: #fee2e2; color: #991b1b; }
+  .badge-available { background: #dcfce7; color: #166534; }
+  .badge-rented    { background: #f3f4f6; color: #374151; }
+
+  .actions-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .12s, border-color .12s;
+    font-size: 16px;
+  }
+  .btn-icon-view  { color: var(--accent); }
+  .btn-icon-edit  { color: #b45309; }
+  .btn-icon-del   { color: #dc2626; }
+  .btn-icon-view:hover  { background: var(--accent-lt); border-color: #9FE1CB; }
+  .btn-icon-edit:hover  { background: #fef3c7; border-color: #fcd34d; }
+  .btn-icon-del:hover   { background: #fee2e2; border-color: #fca5a5; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+  }
+  .empty-state img { width: 160px; margin-bottom: 24px; opacity: .85; }
+  .empty-state h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+  .empty-state p { color: var(--muted); font-size: .9rem; margin-bottom: 20px; }
+</style>
+
+<div class="props-page">
+
+  <div class="props-header">
+    <div>
+      <h2>My Properties</h2>
+      <p>Manage all your listed properties from one place.</p>
+    </div>
+    <a href="{% url 'add_property' %}" class="btn-add">
+      <i class="ti ti-plus"></i> Add Property
+    </a>
+  </div>
+
+  {% if properties %}
+  <div class="props-card">
+    <div style="overflow-x:auto;">
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Location</th>
+            <th>Rent</th>
+            <th>Status</th>
+            <th style="text-align:center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for property in properties %}
+          <tr>
+
+            <td>
+              <div class="prop-cell">
+                {% if property.images.first %}
+                  <img src="{{ property.images.first.image.url }}"
+                       class="prop-thumb" alt="{{ property.title }}">
+                {% else %}
+                  <div class="prop-thumb-placeholder">No photo</div>
+                {% endif %}
+                <div>
+                  <div class="prop-title">{{ property.title }}</div>
+                  <span class="prop-type-pill">{{ property.property_type }}</span>
+                </div>
+              </div>
+            </td>
+
+            <td>
+              <div class="loc-city">{{ property.city }}</div>
+              <div class="loc-district">{{ property.district }}</div>
+            </td>
+
+            <td>
+              <div class="rent-amount">Rs. {{ property.monthly_rent }}</div>
+              <div class="rent-label">/ month</div>
+            </td>
+
+            <td>
+              {% if property.status == "approved" %}
+                <span class="status-badge badge-approved">Approved</span>
+              {% elif property.status == "pending" %}
+                <span class="status-badge badge-pending">Pending</span>
+              {% elif property.status == "rejected" %}
+                <span class="status-badge badge-rejected">Rejected</span>
+                {% if property.rejection_reason %}
+                <div style="margin-top:6px; font-size:.75rem; color:#991b1b; background:#fee2e2;
+                            border-radius:6px; padding:5px 9px; max-width:220px; line-height:1.4;">
+                    {{ property.rejection_reason }}
+                </div>
+                {% endif %}
+              {% endif %}
+            </td>
+
+            <td>
+              <div class="actions-cell">
+                <a href="{% url 'property_detail' property.pk %}"
+                   class="btn-icon btn-icon-view" title="View">
+                  <i class="ti ti-eye"></i>
+                </a>
+                <a href="" class="btn-icon btn-icon-edit" title="Edit">
+                  <i class="ti ti-edit"></i>
+                </a>
+                <a href="" class="btn-icon btn-icon-del" title="Delete"
+                   onclick="return confirm('Delete this property?');">
+                  <i class="ti ti-trash"></i>
+                </a>
+              </div>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="props-card">
+    <div class="empty-state">
+      <img src="{% static 'images/empty.svg' %}" alt="">
+      <h4>No properties listed yet</h4>
+      <p>Start by posting your first property.</p>
+      <a href="{% url 'add_property' %}" class="btn-add">Add Property</a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

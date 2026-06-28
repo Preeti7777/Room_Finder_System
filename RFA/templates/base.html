@@ -912,6 +912,11 @@
             <i class="ti ti-file-text"></i>
             Documents
           </a>
+          <a href="{% url 'my_properties' %}"
+             class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+            <i class="ti ti-message-circle"></i>
+             My Properties
+          </a>
         {% endif %}
       </div>
 

@@ -366,3 +366,20 @@ def reveal_phone_number(request, pk):
         "success": True,
         "phone": property.owner.phone
     })
+
+@login_required
+def my_properties(request):
+    properties = (
+        Property.objects
+        .filter(owner=request.user)
+        .prefetch_related("images")
+        .order_by("-created_at")
+    )
+
+    return render(
+        request,
+        "properties/my_properties.html",
+        {
+            "properties": properties
+        }
+    )

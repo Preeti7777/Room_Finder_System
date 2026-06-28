@@ -9,7 +9,6 @@ from .models import User,EmailOTP
 from django.core.mail import send_mail
 from .forms import ProfileUpdateForm, UserRegistrationForm, LoginForm, VerificationUploadForm
 
-
 def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(
@@ -19,33 +18,18 @@ def register_view(request):
 
         if form.is_valid():
             user = form.save(commit=False)
-            user.email_verified = False
-            user.is_active = False
+
+            # Activate the user immediately
+            user.email_verified = True
+            user.is_active = True
             user.save()
-
-            otp = str(random.randint(100000, 999999))
-
-            EmailOTP.objects.update_or_create(
-                user=user,
-                defaults={'otp': otp}
-            )
-
-            send_mail(
-                subject="Verify your email",
-                message=f"Your OTP code is {otp}. It will expire in 5 minutes.",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-
-            request.session['verify_user_id'] = user.id
 
             messages.success(
                 request,
-                "Account created successfully. Please verify your email."
+                "Account created successfully. Please login."
             )
 
-            return redirect('verify_email_otp')
+            return redirect('login')  # Change this if your login URL name is different
 
     else:
         form = UserRegistrationForm()
@@ -250,3 +234,23 @@ def verify_email_otp(request):
         return redirect('login')
 
     return render(request, 'accounts/verify_email_otp.html')
+
+@login_required
+def delete_account(request):
+    if request.method == "POST":
+        user = request.user
+
+        # Log the user out first
+        logout(request)
+
+        # Delete the account
+        user.delete()
+
+        messages.success(
+            request,
+            "Your account has been deleted successfully."
+        )
+
+        return redirect("property_list")  # Change if your home page URL name is different
+
+    return redirect("profile")
